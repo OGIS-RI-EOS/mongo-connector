@@ -25,11 +25,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.deftlabs.cursor.mongo.TailableCursor;
+import com.deftlabs.cursor.mongo.TailableCursorImpl;
+import com.deftlabs.cursor.mongo.TailableCursorOptions;
 import com.mongodb.*;
 import org.apache.commons.lang.Validate;
 import org.bson.types.BasicBSONList;
 import org.mule.api.ConnectionException;
 import org.mule.api.ConnectionExceptionCode;
+import org.mule.api.annotations.Category;
 import org.mule.api.annotations.Configurable;
 import org.mule.api.annotations.Connect;
 import org.mule.api.annotations.ConnectionIdentifier;
@@ -38,6 +42,8 @@ import org.mule.api.annotations.Disconnect;
 import org.mule.api.annotations.MetaDataSwitch;
 import org.mule.api.annotations.Mime;
 import org.mule.api.annotations.Processor;
+import org.mule.api.annotations.Source;
+import org.mule.api.annotations.SourceThreadingModel;
 import org.mule.api.annotations.Transformer;
 import org.mule.api.annotations.ValidateConnection;
 import org.mule.api.annotations.display.Password;
@@ -46,6 +52,8 @@ import org.mule.api.annotations.param.ConnectionKey;
 import org.mule.api.annotations.param.Default;
 import org.mule.api.annotations.param.Optional;
 import org.mule.api.annotations.param.Payload;
+import org.mule.api.callback.SourceCallback;
+import org.mule.api.callback.StopSourceCallback;
 import org.mule.module.mongo.api.IndexOrder;
 import org.mule.module.mongo.api.MongoClient;
 import org.mule.module.mongo.api.MongoClientAdaptor;
@@ -56,6 +64,7 @@ import org.mule.module.mongo.tools.BackupConstants;
 import org.mule.module.mongo.tools.IncrementalMongoDump;
 import org.mule.module.mongo.tools.MongoDump;
 import org.mule.module.mongo.tools.MongoRestore;
+import org.mule.module.mongo.tools.TailableCursorDocListenerImpl;
 import org.mule.transformer.types.MimeTypes;
 import org.mule.util.StringUtils;
 import org.slf4j.Logger;
@@ -1004,7 +1013,43 @@ public class MongoCloudConnector
     public void endConsistentRequest() {
         client.requestDone();
     }
+    
+    /**
+     * TailableCursor function
+     * 
+     * <p/>
+     * {@sample.xml ../../../doc/mongo-connector.xml.sample mongo:next-tailable-cursor}
+     * 
+     * @param collection the target collection
+     * @param query the {@link DBObject} optional query
+     * @param noDocSleepTime the time if it cat not be find next doc 
+     * @param callback The callback to be called when a message is received
+     * @return {@link org.mule.api.callback.StopSourceCallback}
+     */
+    @Source(primaryNodeOnly = true, threadingModel = SourceThreadingModel.NONE)
+    @Category(name = "Streaming API", description = "Tailable cursors are conceptually equivalent to the tail Unix command with the -f option (i.e. with “follow” mode.) After clients insert new additional documents into a capped collection, the tailable cursor will continue to retrieve documents.")
+    public StopSourceCallback nextTailableCursor(String collection, 
+                                                 @Optional @Default("") final String query,
+                                                 @Optional @Default("10000") Long noDocSleepTime,
+                                                 final SourceCallback callback) {
+        final TailableCursorOptions options
+	    	= new TailableCursorOptions("mongodb://" + host + ":" + port , database, collection);
+	    options.setInitialQuery((DBObject) JSON.parse(query));
+	    options.setNoDocSleepTime(noDocSleepTime);
+	    options.setDocListener(new TailableCursorDocListenerImpl(callback));
 
+	    final TailableCursor tailableCursor = new TailableCursorImpl(options);
+    	
+	    tailableCursor.start();
+	    
+        return new StopSourceCallback() {
+            @Override
+            public void stop() throws Exception {
+                tailableCursor.stop();
+            }
+        };
+    }
+    
     /**
      * Convert JSON to DBObject.
      * <p/>

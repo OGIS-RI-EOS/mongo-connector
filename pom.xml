@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.mule.tools.devkit</groupId>
         <artifactId>mule-devkit-parent</artifactId>
-        <version>3.4.0</version>
+        <version>3.4.2</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -35,6 +35,11 @@
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>${mongo.version}</version>
+        </dependency>
+        <dependency>
+        	<groupId>com.deftlabs</groupId>
+        	<artifactId>mongo-java-tailable-cursor</artifactId>
+        	<version>0.1.1</version>
         </dependency>
 
 	    <!-- Eclipse support -->
