@@ -287,7 +287,3 @@
 <!-- BEGIN_INCLUDE(mongo:end-consistent-request) -->
         <mongo:end-consistent-request />
 <!-- END_INCLUDE(mongo:end-consistent-request) -->
-
-<!-- BEGIN_INCLUDE(mongo:next-tailable-cursor) -->
-        <mongo:next-tailable-cursor collection="myCollection" />
-<!-- END_INCLUDE(mongo:next-tailable-cursor) -->
