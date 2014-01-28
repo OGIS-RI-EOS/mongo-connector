@@ -573,6 +573,7 @@ public class MongoCloudConnector
      * @param query the optional {@link DBObject} query object. If unspecified, all documents are
      *            returned.
      * @param fields alternative way of passing fields as a literal List
+     * @param idExclusion the projection document the exclusion of the _id field
      * @param numToSkip number of objects skip (offset)
      * @param limit limit of objects to return
      * @return an iterable of {@link DBObject}
@@ -581,10 +582,11 @@ public class MongoCloudConnector
     public Iterable<DBObject> findObjects(final String collection,
                                           @Optional @Default("") final DBObject query,
                                           @Placement(group = "Fields") @Optional final List<String> fields,
+                                          @Optional @Default("false") Boolean idExclusion,
                                           @Optional final Integer numToSkip,
                                           @Optional final Integer limit)
     {
-        return client.findObjects(collection, query, fields, numToSkip, limit);
+        return client.findObjects(collection, query, fields, idExclusion, numToSkip, limit);
     }
 
     /**
@@ -596,6 +598,7 @@ public class MongoCloudConnector
      * @param collection the target collection
      * @param queryAttributes the optional query object. If unspecified, all documents are returned.
      * @param fields alternative way of passing fields as a literal List
+     * @param idExclusion the projection document the exclusion of the _id field
      * @param numToSkip number of objects skip (offset)
      * @param limit limit of objects to return
      * @return an iterable of {@link DBObject}
@@ -604,10 +607,11 @@ public class MongoCloudConnector
     public Iterable<DBObject> findObjectsUsingQueryMap(final String collection,
                                                        @Placement(group = "Query Attributes") @Optional final Map<String, Object> queryAttributes,
                                                        @Placement(group = "Fields") @Optional final List<String> fields,
+                                                       @Optional @Default("false") Boolean idExclusion,
                                                        @Optional final Integer numToSkip,
                                                        @Optional final Integer limit)
     {
-        return client.findObjects(collection, (DBObject) adapt(queryAttributes), fields, numToSkip, limit);
+        return client.findObjects(collection, (DBObject) adapt(queryAttributes), fields, idExclusion, numToSkip, limit);
     }
 
     /**

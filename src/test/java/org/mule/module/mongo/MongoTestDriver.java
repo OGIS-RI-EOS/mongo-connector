@@ -281,7 +281,7 @@ public class MongoTestDriver
         insertInTestDb(new BasicDBObject("x", 4));
         insertInTestDb(new BasicDBObject("x", 5));
 
-        Iterator<DBObject> iter = connector.findObjects(MAIN_COLLECTION, null, null, 2, 2).iterator();
+        Iterator<DBObject> iter = connector.findObjects(MAIN_COLLECTION, null, null, Boolean.valueOf(false), 2, 2).iterator();
 
         assertEquals(3, iter.next().get("x"));
         assertEquals(4, iter.next().get("x"));
@@ -299,7 +299,7 @@ public class MongoTestDriver
             new BasicDBObject("x", new BasicDBObject("$gt", 55)), new BasicDBObject("$inc",
                 new BasicDBObject("x", 2)), false, true, WriteConcern.DATABASE_DEFAULT);
 
-        Iterator<DBObject> iter = connector.findObjects(MAIN_COLLECTION, null, null, null, null).iterator();
+        Iterator<DBObject> iter = connector.findObjects(MAIN_COLLECTION, null, null, Boolean.valueOf(false), null, null).iterator();
         assertEquals(50, iter.next().get("x"));
         assertEquals(62, iter.next().get("x"));
         assertEquals(62, iter.next().get("x"));
@@ -316,7 +316,7 @@ public class MongoTestDriver
             new BasicDBObject("x", new BasicDBObject("$gt", 55)), new BasicDBObject("$inc",
                 new BasicDBObject("x", 2)), false, false, WriteConcern.DATABASE_DEFAULT);
 
-        Iterator<DBObject> iter = connector.findObjects(MAIN_COLLECTION, null, null, null, null).iterator();
+        Iterator<DBObject> iter = connector.findObjects(MAIN_COLLECTION, null, null, Boolean.valueOf(false), null, null).iterator();
         assertEquals(50, iter.next().get("x"));
         assertEquals(62, iter.next().get("x"));
         assertEquals(60, iter.next().get("x"));
