@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.mule.tools.devkit</groupId>
         <artifactId>mule-devkit-parent</artifactId>
-        <version>3.4.0</version>
+        <version>3.4.2</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -11,7 +11,7 @@
     <artifactId>mule-module-mongo</artifactId>
     <packaging>mule-module</packaging>
     <name>Mule Mongo Connector</name>
-    <version>3.4.1-SNAPSHOT</version>
+    <version>3.4.2-SNAPSHOT</version>
     <description>Mule Cloud connector to mongo</description>
     <url>http://www.muleforge.org/projects/mule-module-mongo</url>
 
@@ -35,6 +35,11 @@
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>${mongo.version}</version>
+        </dependency>
+        <dependency>
+        	<groupId>com.deftlabs</groupId>
+        	<artifactId>mongo-java-tailable-cursor</artifactId>
+        	<version>0.1.1</version>
         </dependency>
 
 	    <!-- Eclipse support -->

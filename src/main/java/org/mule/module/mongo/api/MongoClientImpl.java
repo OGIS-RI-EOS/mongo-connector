@@ -129,14 +129,28 @@ public class MongoClientImpl implements MongoClient
     }
 
     public Iterable<DBObject> findObjects(@NotNull final String collection,
+            final DBObject query,
+            final List<String> fields,
+            final Integer numToSkip,
+            final Integer limit)
+    {
+    	return findObjects(collection, query, fields, Boolean.valueOf(false), numToSkip, limit);
+    }
+    
+    public Iterable<DBObject> findObjects(@NotNull final String collection,
                                           final DBObject query,
                                           final List<String> fields,
+                                          final Boolean idExclusion,
                                           final Integer numToSkip,
                                           final Integer limit)
     {
         Validate.notNull(collection);
 
-        DBCursor dbCursor = db.getCollection(collection).find(query, FieldsSet.from(fields));
+        DBObject limitFields = FieldsSet.from(fields);
+        if( idExclusion ){
+        	limitFields.put("_id", 0);
+        }
+        DBCursor dbCursor = db.getCollection(collection).find(query, limitFields);
         if (numToSkip != null)
         {
             dbCursor = dbCursor.skip(numToSkip);
