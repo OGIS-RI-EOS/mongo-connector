@@ -11,37 +11,28 @@ package org.mule.module.mongo.automation.testcases;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.WriteResult;
 
 public class AddUserTestCases extends MongoTestParent {
 	
-	@SuppressWarnings("unchecked")
 	@Category({RegressionTests.class})
 	@Test
 	public void testAddUser() {
 		try {
-			testObjects = (HashMap<String, Object>) context.getBean("addUser");
+			initializeTestRunMessage("addUser");
 			
-			MessageProcessor flow = lookupFlowConstruct("add-user");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-			
-			WriteResult result = (WriteResult) response.getMessage().getPayload();
+			WriteResult result = runFlowAndGetPayload("add-user");
 			assertTrue(result.getLastError().ok());
 			assertTrue(result.getError() == null);
-			// For an insert, getN() always return 0
-//			assertTrue(result.getN() == 1);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
 		
 	}
 	

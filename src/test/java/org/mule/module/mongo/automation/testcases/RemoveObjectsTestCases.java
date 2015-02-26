@@ -11,64 +11,44 @@ package org.mule.module.mongo.automation.testcases;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
 import org.mule.module.mongo.api.MongoCollection;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 public class RemoveObjectsTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
+
 	@Before
-	public void setUp() {
-		try {
-			testObjects = (HashMap<String, Object>) context.getBean("removeObjects");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
-			
-			flow = lookupFlowConstruct("insert-object");
-			flow.process(getTestEvent(testObjects));			
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	public void setUp() throws Exception {
+			initializeTestRunMessage("removeObjects");
+			runFlowAndGetPayload("create-collection");
+			runFlowAndGetPayload("insert-object");			
+
 	}
 	
 	@Category({RegressionTests.class})
 	@Test
 	public void testRemoveObjects() {
 		try {
-			MessageProcessor flow = lookupFlowConstruct("remove-objects");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-			
-			flow = lookupFlowConstruct("find-objects");
-			response = flow.process(getTestEvent(testObjects));
-			
-			MongoCollection payload = (MongoCollection) response.getMessage().getPayload();
+			runFlowAndGetPayload("remove-objects");
+			MongoCollection payload = runFlowAndGetPayload("find-objects");
 			assertTrue(payload.isEmpty());			
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 	
 	@After
-	public void tearDown() {
-		try {
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	public void tearDown() throws Exception {
+			runFlowAndGetPayload("drop-collection");
+
+
 	}
 	
 }

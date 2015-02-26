@@ -1,242 +1,260 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.4.0"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.5.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo"
-    xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns:json="http://www.mulesoft.org/schema/mule/json"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
-http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd">
 
-	<context:property-placeholder location="${MONGO_CREDENTIALS}" />
+	<context:property-placeholder location="automation-credentials.properties" />
 
-	<mongo:config name="Mongo_DB" host="${mongo.host}" port="${mongo.port}"
-		database="${mongo.database}" doc:name="Mongo DB" connectionsPerHost="4" maxWaitTime="5000">
-		<mongo:connection-pooling-profile maxActive="2"
-			initialisationPolicy="INITIALISE_ONE" exhaustedAction="WHEN_EXHAUSTED_WAIT" maxWait="5000" />
+	<mongo:config name="Mongo_DB" username="${mongo.username}"
+		password="${mongo.password}" host="${mongo.host}" port="${mongo.port}"
+		database="${mongo.database}" doc:name="Mongo DB" connectionsPerHost="4"
+		maxWaitTime="5000">
+		<mongo:connection-pooling-profile
+			maxActive="2" initialisationPolicy="INITIALISE_ONE" exhaustedAction="WHEN_EXHAUSTED_WAIT"
+			maxWait="5000" />
 	</mongo:config>
-	
-	<mongo:config name="Mongo_DB_for_drop_restore" host="${mongo.host}"
-		port="${mongo.port}" database="${mongo.database.drop.restore}">
+
+	<mongo:config name="Mongo_DB_for_drop_restore" username="${mongo.username}"
+		password="${mongo.password}" host="${mongo.host.drop.restore}" port="${mongo.port.drop.restore}"
+		database="${mongo.database.drop.restore}" doc:name="Mongo DB">
 		<mongo:connection-pooling-profile
 			initialisationPolicy="INITIALISE_ONE" exhaustedAction="WHEN_EXHAUSTED_GROW" />
 	</mongo:config>
 
 	<flow name="create-collection" doc:name="create-collection">
+		<logger message="Username is ${mongo.username} and password ${mongo.password}"
+			level="WARN" doc:name="Logger" />
 		<mongo:create-collection config-ref="Mongo_DB"
-			collection="#[payload.collection]" doc:name="Mongo DB" />
+			collection="#[flowVars.collection]" doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="save-object-for-drop-restore" doc:name="save-object">
+	<flow name="save-object-for-drop-restore" doc:name="save-object-for-drop-restore">
 		<mongo:save-object config-ref="Mongo_DB_for_drop_restore"
-			collection="#[payload.collection]" element-ref="#[payload.elementRef]"
-			writeConcern="#[payload.writeConcern]" />
+			collection="#[flowVars.collection]" element-ref="#[flowVars.elementRef]"
+			writeConcern="#[flowVars.writeConcern]" doc:name="Mongo DB" />
 	</flow>
-	
-	<flow name="drop-collection-for-drop-restore">
+
+	<flow name="drop-collection-for-drop-restore" doc:name="drop-collection-for-drop-restore">
 		<mongo:drop-collection config-ref="Mongo_DB_for_drop_restore"
-			collection="#[payload.collection]" doc:name="Mongo DB" />
+			collection="#[flowVars.collection]" doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="drop-collection" doc:name="drop-collection">
 		<mongo:drop-collection config-ref="Mongo_DB"
-			collection="#[payload.collection]" doc:name="Mongo DB" />
+			collection="#[flowVars.collection]" doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="exists-collection" doc:name="collection-exists">
+	<flow name="exists-collection" doc:name="exists-collection">
 		<mongo:exists-collection config-ref="Mongo_DB"
-			collection="#[payload.collection]" doc:name="Mongo_DB" />
+			collection="#[flowVars.collection]" doc:name="Mongo_DB" />
 	</flow>
 
-	<flow name="exists-collection-for-drop-restore">
+	<flow name="exists-collection-for-drop-restore" doc:name="exists-collection-for-drop-restore">
 		<mongo:exists-collection config-ref="Mongo_DB_for_drop_restore"
-			collection="#[payload.collection]" doc:name="Mongo_DB" />
+			collection="#[flowVars.collection]" doc:name="Mongo_DB" />
 	</flow>
 
 	<flow name="list-collections" doc:name="list-collections">
-		<mongo:list-collections config-ref="Mongo_DB" />
+		<mongo:list-collections config-ref="Mongo_DB"
+			doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="create-index" doc:name="create-index">
 		<mongo:create-index config-ref="Mongo_DB"
-			collection="#[payload.collection]" field="#[payload.field]" order="#[payload.order]" />
+			collection="#[flowVars.collection]" field="#[flowVars.field]" order="#[flowVars.order]"
+			doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="count-objects" doc:name="count-objects">
 		<mongo:count-objects config-ref="Mongo_DB"
-			collection="#[payload.collection]" query-ref="#[payload.queryRef]" />
+			collection="#[flowVars.collection]" query-ref="#[flowVars.queryRef]"
+			doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="count-objects-using-query-map-without-query" doc:name="count-objects-using-query-map-without-query">
 		<mongo:count-objects-using-query-map
-			config-ref="Mongo_DB" collection="#[payload.collection]" />
+			config-ref="Mongo_DB" collection="#[flowVars.collection]" doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="count-objects-using-query-map-with-query" doc:name="count-objects-using-query-map-with-query">
 		<mongo:count-objects-using-query-map
-			config-ref="Mongo_DB" collection="#[payload.collection]">
+			config-ref="Mongo_DB" collection="#[flowVars.collection]" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.queryAttribKey]">#[payload.queryAttribVal]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.queryAttribKey]">#[flowVars.queryAttribVal]</mongo:query-attribute>
 			</mongo:query-attributes>
 		</mongo:count-objects-using-query-map>
 	</flow>
 
 	<flow name="create-file-from-payload" doc:name="create-file-from-payload">
 		<mongo:create-file-from-payload
-			config-ref="Mongo_DB" doc:name="Mongo DB" filename="#[sessionVars.filename]"
-			metadata-ref="#[sessionVars.metaDataRef]" />
+			config-ref="Mongo_DB" doc:name="Mongo DB" filename="#[flowVars.filename]"
+			metadata-ref="#[flowVars.metaDataRef]" />
 	</flow>
 
-	<flow name="remove-files-using-query-map-empty-query">
+	 
+	<flow name="remove-files-using-query-map-empty-query" doc:name="remove-files-using-query-map-empty-query">
 		<mongo:remove-files-using-query-map
-			config-ref="Mongo_DB" />
+			config-ref="Mongo_DB" doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="remove-files-using-query-map-non-empty-query">
+	<flow name="remove-files-using-query-map-non-empty-query"
+		doc:name="remove-files-using-query-map-non-empty-query">
 		<mongo:remove-files-using-query-map
-			config-ref="Mongo_DB">
+			config-ref="Mongo_DB" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.key]">#[payload.value]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.key]">#[flowVars.value]</mongo:query-attribute>
 			</mongo:query-attributes>
 		</mongo:remove-files-using-query-map>
 	</flow>
 
 	<flow name="restore" doc:name="restore">
 		<mongo:restore config-ref="Mongo_DB_for_drop_restore"
-			inputPath="#[payload.inputPath]" drop="#[payload.drop]" oplogReplay="#[payload.oplogReplay]" />
+			inputPath="#[flowVars.inputPath]" drop="#[flowVars.drop]" oplogReplay="#[flowVars.oplogReplay]"
+			doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="drop-database">
-		<mongo:drop-database config-ref="Mongo_DB_for_drop_restore" />
+	<flow name="drop-database" doc:name="drop-database">
+		<mongo:drop-database config-ref="Mongo_DB_for_drop_restore"
+			doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="createIndex_Dump">
-		<mongo:create-index collection="#[payload.collection]"
-			field="#[payload.field]" order="#[payload.order]" config-ref="Mongo_DB_for_drop_restore" />
+	<flow name="createIndex_Dump" doc:name="createIndex_Dump">
+		<mongo:create-index collection="#[flowVars.collection]"
+			field="#[flowVars.field]" order="#[flowVars.order]" config-ref="Mongo_DB_for_drop_restore"
+			doc:name="Mongo DB" />
 		<mongo:dump config-ref="Mongo_DB_for_drop_restore"
-			outputDirectory="#[payload.outputDirectory]" outputName="#[payload.outputName]"
-			zip="#[payload.zip]" oplog="#[payload.oplog]" threads="#[payload.threads]" />
+			outputDirectory="#[flowVars.outputDirectory]" outputName="#[flowVars.outputName]"
+			zip="#[flowVars.zip]" oplog="#[flowVars.oplog]" threads="#[flowVars.threads]"
+			doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="find-files" doc:name="find-files">
-		<mongo:find-files config-ref="Mongo_DB" />
+		<mongo:find-files config-ref="Mongo_DB" doc:name="Mongo DB" query-ref="#[payload.queryRef]" />
 	</flow>
 
 	<flow name="find-files-using-query-map" doc:name="find-files-using-query-map">
 		<mongo:find-files-using-query-map
-			config-ref="Mongo_DB">
+			config-ref="Mongo_DB" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.queryAttribKey]">#[payload.queryAttribVal]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.queryAttribKey]">#[flowVars.queryAttribVal]</mongo:query-attribute>
 			</mongo:query-attributes>
 		</mongo:find-files-using-query-map>
 	</flow>
 
 	<flow name="find-one-file" doc:name="find-one-file">
 		<mongo:find-one-file config-ref="Mongo_DB"
-			query-ref="#[payload.queryRef]" />
+			query-ref="#[flowVars.queryRef]" doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="find-one-file-using-query-map" doc:name="find-one-file-using-query-map">
 		<mongo:find-one-file-using-query-map
-			config-ref="Mongo_DB">
+			config-ref="Mongo_DB" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.key]">#[payload.value]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.key]">#[flowVars.value]</mongo:query-attribute>
 			</mongo:query-attributes>
 		</mongo:find-one-file-using-query-map>
 	</flow>
 
 	<flow name="dump" doc:name="dump">
-		<mongo:dump config-ref="Mongo_DB" outputDirectory="#[payload.outputDirectory]"
-			outputName="#[payload.outputName]" zip="#[payload.zip]" oplog="#[payload.oplog]"
-			threads="#[payload.threads]" />
+		<mongo:dump config-ref="Mongo_DB" outputDirectory="#[flowVars.outputDirectory]"
+			outputName="#[flowVars.outputName]" zip="#[flowVars.zip]" oplog="#[flowVars.oplog]"
+			threads="#[flowVars.threads]" doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="incremental-dump" doc:name="dump">
+	<flow name="incremental-dump" doc:name="incremental-dump">
 		<mongo:incremental-dump config-ref="Mongo_DB"
-			outputDirectory="#[payload.outputDirectory]" />
+			outputDirectory="#[flowVars.outputDirectory]" doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="list-files" doc:name="list-files">
-		<mongo:list-files config-ref="Mongo_DB" query-ref="#[payload.queryRef]" />
+		<mongo:list-files config-ref="Mongo_DB" query-ref="#[flowVars.queryRef]"
+			doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="list-files-using-query-map-empty-query" doc:name="list-files-using-query-map">
+	<flow name="list-files-using-query-map-empty-query" doc:name="list-files-using-query-map-empty-query">
 		<mongo:list-files-using-query-map
-			config-ref="Mongo_DB" />
+			config-ref="Mongo_DB" doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="list-files-using-query-map-non-empty-query" doc:name="list-files-using-query-map">
+	<flow name="list-files-using-query-map-non-empty-query" doc:name="list-files-using-query-map-non-empty-query">
 		<mongo:list-files-using-query-map
-			config-ref="Mongo_DB">
+			config-ref="Mongo_DB" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.key]">#[payload.value]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.key]">#[flowVars.value]</mongo:query-attribute>
 			</mongo:query-attributes>
 		</mongo:list-files-using-query-map>
 	</flow>
 
-	<flow name="get-file-content" doc:name="getFileContent">
+	<flow name="get-file-content" doc:name="get-file-content">
 		<mongo:get-file-content config-ref="Mongo_DB"
-			query-ref="#[payload.queryRef]" />
+			query-ref="#[flowVars.queryRef]" doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="get-file-content-using-query-map" doc:name="getFileContentUsingQueryMap">
+	<flow name="get-file-content-using-query-map" doc:name="get-file-content-using-query-map">
 		<mongo:get-file-content-using-query-map
 			config-ref="Mongo_DB" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.key]">#[payload.value]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.key]">#[flowVars.value]</mongo:query-attribute>
 			</mongo:query-attributes>
 		</mongo:get-file-content-using-query-map>
 	</flow>
 
-	<!-- UNTESTED -->
 	<flow name="drop-index" doc:name="drop-index">
-		<mongo:drop-index config-ref="Mongo_DB" collection="#[payload.collection]"
-			index="#[payload.index]" />
+		<mongo:drop-index config-ref="Mongo_DB" collection="#[flowVars.collection]"
+			index="#[flowVars.index]" doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="drop-index-for-drop-restore">
+	<flow name="drop-index-for-drop-restore" doc:name="drop-index-for-drop-restore">
 		<mongo:drop-index config-ref="Mongo_DB_for_drop_restore"
-			collection="#[payload.collection]" index="#[payload.index]" />
+			collection="#[flowVars.collection]" index="#[flowVars.index]" doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="list-indices" doc:name="list-indices">
 		<mongo:list-indices config-ref="Mongo_DB"
-			collection="#[payload.collection]" />
+			collection="#[flowVars.collection]" doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="list-indices-for-drop-restore">
+	<flow name="list-indices-for-drop-restore" doc:name="list-indices-for-drop-restore">
 		<mongo:list-indices config-ref="Mongo_DB_for_drop_restore"
-			collection="#[payload.collection]" />
+			collection="#[flowVars.collection]" doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="insert-object" doc:name="insert-object">
 		<mongo:insert-object config-ref="Mongo_DB"
-			collection="#[payload.collection]" dbObject-ref="#[payload.dbObjectRef]" />
+			collection="#[flowVars.collection]" dbObject-ref="#[flowVars.dbObjectRef]"
+			doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="insert-object-from-map" doc:name="insert-object-from-map-with-elements">
+	<flow name="insert-object-from-map" doc:name="insert-object-from-map">
 		<mongo:insert-object-from-map config-ref="Mongo_DB"
-			writeConcern="#[payload.writeConcern]" collection="#[payload.collection]">
+			writeConcern="#[flowVars.writeConcern]" collection="#[flowVars.collection]"
+			doc:name="Mongo DB">
 			<mongo:element-attributes>
-				<mongo:element-attribute key="#[payload.key]">#[payload.value]</mongo:element-attribute>
+				<mongo:element-attribute key="#[flowVars.key]">#[flowVars.value]</mongo:element-attribute>
 			</mongo:element-attributes>
 		</mongo:insert-object-from-map>
 	</flow>
 
 	<flow name="remove-objects" doc:name="remove-objects">
 		<mongo:remove-objects config-ref="Mongo_DB"
-			collection="#[payload.collection]" query-ref="#[payload.queryRef]" />
+			collection="#[flowVars.collection]" query-ref="#[flowVars.queryRef]"
+			doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="remove-objects-using-query-map-with-query-map"
 		doc:name="remove-objects-using-query-map-with-query-map">
 		<mongo:remove-objects-using-query-map
-			config-ref="Mongo_DB" collection="#[payload.collection]"
-			writeConcern="#[payload.writeConcern]">
+			config-ref="Mongo_DB" collection="#[flowVars.collection]"
+			writeConcern="#[flowVars.writeConcern]" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.key]">#[payload.value]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.key]">#[flowVars.value]</mongo:query-attribute>
 			</mongo:query-attributes>
 		</mongo:remove-objects-using-query-map>
 	</flow>
@@ -245,135 +263,142 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
 	<flow name="remove-objects-using-query-map-without-query-map"
 		doc:name="remove-objects-using-query-map-without-query-map">
 		<mongo:remove-objects-using-query-map
-			config-ref="Mongo_DB" collection="#[payload.collection]"
-			writeConcern="#[payload.writeConcern]" />
+			config-ref="Mongo_DB" collection="#[flowVars.collection]"
+			writeConcern="#[flowVars.writeConcern]" doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="find-objects" doc:name="find-objects">
 		<mongo:find-objects config-ref="Mongo_DB"
-			collection="#[payload.collection]" />
+			collection="#[flowVars.collection]" doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="find-objects-using-query-map-without-query" doc:name="find-objects-using-query-map-without-query">
 		<mongo:find-objects-using-query-map
-			config-ref="Mongo_DB" collection="#[payload.collection]" />
+			config-ref="Mongo_DB" collection="#[flowVars.collection]" doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="find-objects-using-query-map-with-limit" doc:name="find-objects-using-query-map-without-query">
+	<flow name="find-objects-using-query-map-with-limit" doc:name="find-objects-using-query-map-with-limit">
 		<mongo:find-objects-using-query-map
-			config-ref="Mongo_DB" limit="#[payload.limit]" collection="#[payload.collection]" />
+			config-ref="Mongo_DB" limit="#[flowVars.limit]" collection="#[flowVars.collection]"
+			doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="find-objects-using-query-map-with-query" doc:name="find-objects-using-query-map-with-query">
 		<mongo:find-objects-using-query-map
-			config-ref="Mongo_DB" collection="#[payload.collection]">
+			config-ref="Mongo_DB" collection="#[flowVars.collection]" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.queryKey]">#[payload.queryValue]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.queryKey]">#[flowVars.queryValue]</mongo:query-attribute>
 			</mongo:query-attributes>
 		</mongo:find-objects-using-query-map>
 	</flow>
 
 	<flow name="find-one-object" doc:name="find-one-object">
 		<mongo:find-one-object config-ref="Mongo_DB"
-			collection="#[payload.collection]" query-ref="#[payload.queryRef]" />
+			collection="#[flowVars.collection]" query-ref="#[flowVars.queryRef]"
+			doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="find-one-object-using-query-map" doc:name="find-one-object-using-query-map">
 		<mongo:find-one-object-using-query-map
-			config-ref="Mongo_DB" collection="#[payload.collection]">
+			config-ref="Mongo_DB" collection="#[flowVars.collection]" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.key]">#[payload.value]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.key]">#[flowVars.value]</mongo:query-attribute>
 			</mongo:query-attributes>
 		</mongo:find-one-object-using-query-map>
 	</flow>
 
 	<flow name="save-object" doc:name="save-object">
 		<mongo:save-object config-ref="Mongo_DB"
-			collection="#[payload.collection]" element-ref="#[payload.elementRef]"
-			writeConcern="#[payload.writeConcern]" />
+			collection="#[flowVars.collection]" element-ref="#[flowVars.elementRef]"
+			writeConcern="#[flowVars.writeConcern]" doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="save-object-from-map" doc:name="save-object-from-map">
 		<mongo:save-object-from-map config-ref="Mongo_DB"
-			collection="#[payload.collection]">
+			collection="#[flowVars.collection]" doc:name="Mongo DB">
 			<mongo:element-attributes>
-				<mongo:element-attribute key="#[payload.key]">#[payload.value]</mongo:element-attribute>
+				<mongo:element-attribute key="#[flowVars.key]">#[flowVars.value]</mongo:element-attribute>
 			</mongo:element-attributes>
 		</mongo:save-object-from-map>
 	</flow>
 
 	<flow name="add-user" doc:name="add-user">
-		<mongo:add-user config-ref="Mongo_DB" newPassword="#[payload.newPassword]"
-			newUsername="#[payload.newUsername]" />
+		<mongo:add-user config-ref="Mongo_DB" newPassword="#[flowVars.newPassword]"
+			newUsername="#[flowVars.newUsername]" doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="execute-command" doc:name="execute-command">
 		<mongo:execute-command config-ref="Mongo_DB"
-			commandName="#[payload.commandName]" commandValue="#[payload.commandValue]" />
+			commandName="#[flowVars.commandName]" commandValue="#[flowVars.commandValue]"
+			doc:name="Mongo DB" />
 	</flow>
 
-	<flow name="update-objects-single-object" doc:name="update-objects">
-		<mongo:update-objects collection="#[payload.collection]"
-			multi="false" config-ref="Mongo_DB" query-ref="#[payload.queryRef]"
-			writeConcern="#[payload.writeConcern]" element-ref="#[payload.elementRef]" />
+	<flow name="update-objects-single-object" doc:name="update-objects-single-object">
+		<mongo:update-objects collection="#[flowVars.collection]"
+			multi="false" config-ref="Mongo_DB" query-ref="#[flowVars.queryRef]"
+			writeConcern="#[flowVars.writeConcern]" element-ref="#[flowVars.elementRef]"
+			doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="map-reduce-objects" doc:name="map-reduce-objects">
 		<mongo:map-reduce-objects config-ref="Mongo_DB"
-			collection="#[payload.collection]" mapFunction="#[payload.mapFunction]"
-			reduceFunction="#[payload.reduceFunction]" outputCollection="#[payload.outputCollection]" />
+			collection="#[flowVars.collection]" mapFunction="#[flowVars.mapFunction]"
+			reduceFunction="#[flowVars.reduceFunction]" outputCollection="#[flowVars.outputCollection]"
+			doc:name="Mongo DB" />
 	</flow>
 
 	<flow name="update-objects-using-map" doc:name="update-objects-using-map">
 		<mongo:update-objects-using-map
-			collection="#[payload.collection]" config-ref="Mongo_DB"
-			writeConcern="#[payload.writeConcern]">
+			collection="#[flowVars.collection]" config-ref="Mongo_DB"
+			writeConcern="#[flowVars.writeConcern]" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.queryKey]">#[payload.queryValue]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.queryKey]">#[flowVars.queryValue]</mongo:query-attribute>
 			</mongo:query-attributes>
 			<mongo:element-attributes>
-				<mongo:element-attribute key="#[payload.operator]">#[payload.dbObject]</mongo:element-attribute>
+				<mongo:element-attribute key="#[flowVars.operator]">#[flowVars.dbObject]</mongo:element-attribute>
 			</mongo:element-attributes>
 		</mongo:update-objects-using-map>
 	</flow>
 
-	<flow name="update-objects-using-query-map">
+	<flow name="update-objects-using-query-map" doc:name="update-objects-using-query-map">
 		<mongo:update-objects-using-query-map
-			config-ref="Mongo_DB" collection="#[payload.collection]"
-			writeConcern="#[payload.writeConcern]" upsert="#[payload.upsert]"
-			multi="#[payload.multi]" element-ref="#[payload.dbObject]">
+			config-ref="Mongo_DB" collection="#[flowVars.collection]"
+			writeConcern="#[flowVars.writeConcern]" upsert="#[flowVars.upsert]"
+			multi="#[flowVars.multi]" element-ref="#[flowVars.dbObject]" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.queryKey]">#[payload.queryValue]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.queryKey]">#[flowVars.queryValue]</mongo:query-attribute>
 			</mongo:query-attributes>
 		</mongo:update-objects-using-query-map>
 	</flow>
 
-	<flow name="update-objects-by-function">
+	<flow name="update-objects-by-function" doc:name="update-objects-by-function">
 		<mongo:update-objects-by-function
-			config-ref="Mongo_DB" collection="#[payload.collection]" element-ref="#[payload.elementRef]"
-			function="#[payload.function]" query-ref="#[payload.queryRef]"
-			upsert="#[payload.upsert]" multi="#[payload.multi]" writeConcern="#[payload.writeConcern]">
+			config-ref="Mongo_DB" collection="#[flowVars.collection]" element-ref="#[flowVars.elementRef]"
+			function="#[flowVars.function]" query-ref="#[flowVars.queryRef]"
+			upsert="#[flowVars.upsert]" multi="#[flowVars.multi]" writeConcern="#[flowVars.writeConcern]"
+			doc:name="Mongo DB">
 		</mongo:update-objects-by-function>
 	</flow>
 
-	<flow name="update-objects-by-function-using-map">
+	<flow name="update-objects-by-function-using-map" doc:name="update-objects-by-function-using-map">
 		<mongo:update-objects-by-function-using-map
-			config-ref="Mongo_DB" collection="#[payload.collection]" upsert="#[payload.upsert]"
-			multi="#[payload.multi]" writeConcern="#[payload.writeConcern]"
-			function="#[payload.function]">
+			config-ref="Mongo_DB" collection="#[flowVars.collection]" upsert="#[flowVars.upsert]"
+			multi="#[flowVars.multi]" writeConcern="#[flowVars.writeConcern]"
+			function="#[flowVars.function]" doc:name="Mongo DB">
 			<mongo:query-attributes>
-				<mongo:query-attribute key="#[payload.queryKey]">#[payload.queryValue]</mongo:query-attribute>
+				<mongo:query-attribute key="#[flowVars.queryKey]">#[flowVars.queryValue]</mongo:query-attribute>
 			</mongo:query-attributes>
 			<mongo:element-attributes>
-				<mongo:element-attribute key="#[payload.elementKey]">#[payload.elementValue]</mongo:element-attribute>
+				<mongo:element-attribute key="#[flowVars.elementKey]">#[flowVars.elementValue]</mongo:element-attribute>
 			</mongo:element-attributes>
 		</mongo:update-objects-by-function-using-map>
 	</flow>
-    
-    <flow name="count-open-connections">
-        <mongo:execute-command commandName="serverStatus"
-                config-ref="Mongo_DB"/>
-        <set-payload value="#[json:connections/current]" />
-    </flow>
+
+	<flow name="count-open-connections" doc:name="count-open-connections">
+		<mongo:execute-command commandName="serverStatus"
+			config-ref="Mongo_DB" doc:name="Mongo DB" />
+		<set-payload value="#[json:connections/current]" doc:name="Set Payload" />
+	</flow>
 
 </mule>
+

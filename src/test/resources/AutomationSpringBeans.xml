@@ -8,10 +8,14 @@
                            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
                            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
+
+	<bean id="randomShortString" class="org.mule.modules.tests.ConnectorTestUtils"
+			factory-method="generateRandomShortString" scope="prototype" />
+
 	<!-- create collection -->
 	<util:map id="createCollection" map-class="java.util.HashMap"
 		key-type="java.lang.String" value-type="java.lang.String" scope="prototype">
-		<entry key="collection" value="testCollection" />
+		<entry key="collection" value-ref="randomShortString" />
 	</util:map>
 
 	<!-- drop collection -->
@@ -121,6 +125,7 @@
 		key-type="java.lang.String" value-type="java.lang.Object" scope="prototype">
 		<entry key="filename1" value="file1" />
 		<entry key="filename2" value="file2" />
+		<entry key="filename3" value="file3" />
 		<entry key="queryRef">
 		    <bean class="com.mongodb.BasicDBObject" scope="prototype" />
 		</entry>

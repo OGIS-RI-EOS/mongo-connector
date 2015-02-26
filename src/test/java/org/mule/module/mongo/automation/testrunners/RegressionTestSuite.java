@@ -6,7 +6,7 @@
  * LICENSE.md file.
  */
 
-package org.mule.module.mongo.api.automation;
+package org.mule.module.mongo.automation.testrunners;
 
 import org.junit.experimental.categories.Categories;
 import org.junit.experimental.categories.Categories.IncludeCategory;
@@ -43,6 +43,7 @@ import org.mule.module.mongo.automation.testcases.ListFilesTestCases;
 import org.mule.module.mongo.automation.testcases.ListFilesUsingQueryMapTestCases;
 import org.mule.module.mongo.automation.testcases.ListIndicesTestCases;
 import org.mule.module.mongo.automation.testcases.MapReduceObjectsTestCases;
+import org.mule.module.mongo.automation.testcases.PoolingTestCases;
 import org.mule.module.mongo.automation.testcases.RemoveFilesTestCases;
 import org.mule.module.mongo.automation.testcases.RemoveFilesUsingQueryMapTestCases;
 import org.mule.module.mongo.automation.testcases.RemoveObjectsTestCases;
@@ -56,32 +57,56 @@ import org.mule.module.mongo.automation.testcases.UpdateObjectsTestCases;
 import org.mule.module.mongo.automation.testcases.UpdateObjectsUsingMapTestCases;
 import org.mule.module.mongo.automation.testcases.UpdateObjectsUsingQueryMapTestCases;
 
+
 @RunWith(Categories.class)
 @IncludeCategory(RegressionTests.class)
-@SuiteClasses({ AddUserTestCases.class, CountObjectsTestCases.class,
-		CountObjectsUsingQueryMapTestCases.class,
-		CreateCollectionTestCases.class, CreateFileFromPayloadTestCases.class,
-		CreateIndexTestCases.class, DropCollectionTestCases.class,
-		DropDatabaseTestCases.class, DropIndexTestCases.class,
-		DumpTestCases.class, ExecuteCommandTestCases.class,
-		ExistsCollectionTestCases.class, FindFilesTestCases.class,
-		FindFilesUsingQueryMapTestCases.class, FindObjectsTestCases.class,
-		FindObjectsUsingQueryMapTestCases.class, FindOneFileTestCases.class,
-		FindOneFileUsingQueryMapTestCases.class, FindOneObjectTestCases.class,
-		FindOneObjectUsingQueryMapTestCases.class,
-		GetFileContentTestCases.class,
-		GetFileContentUsingQueryMapTestCases.class,
-		IncrementalDumpTestCases.class, InsertObjectFromMapTestCases.class,
-		InsertObjectTestCases.class, ListCollectionTestCases.class,
-		ListFilesTestCases.class, ListFilesUsingQueryMapTestCases.class,
-		ListIndicesTestCases.class, MapReduceObjectsTestCases.class,
-		RemoveFilesTestCases.class, RemoveFilesUsingQueryMapTestCases.class,
-		RemoveObjectsTestCases.class, RemoveObjectsUsingQueryMapTestCases.class,
-		RestoreTestCases.class, SaveObjectFromMapTestCases.class,
-		SaveObjectTestCases.class, UpdateObjectsByFunctionTestCases.class,
-		UpdateObjectsByFunctionUsingMapTestCases.class,
-		UpdateObjectsTestCases.class, UpdateObjectsUsingMapTestCases.class,
-		UpdateObjectsUsingQueryMapTestCases.class })
-public class RegressionTestSuite {
 
+@SuiteClasses({ 
+	AddUserTestCases.class,
+	CountObjectsTestCases.class,
+	CountObjectsUsingQueryMapTestCases.class,
+	CreateCollectionTestCases.class,
+	CreateFileFromPayloadTestCases.class,
+	CreateIndexTestCases.class,
+	DropCollectionTestCases.class,
+	DropDatabaseTestCases.class,
+	DropIndexTestCases.class,
+	DumpTestCases.class,
+	ExecuteCommandTestCases.class,
+	ExistsCollectionTestCases.class,
+	FindFilesTestCases.class,
+	FindFilesUsingQueryMapTestCases.class,
+	FindObjectsTestCases.class,
+	FindObjectsUsingQueryMapTestCases.class,
+	FindOneFileTestCases.class,
+	FindOneFileUsingQueryMapTestCases.class,
+	FindOneObjectTestCases.class,
+	FindOneObjectUsingQueryMapTestCases.class,
+	GetFileContentTestCases.class,
+	GetFileContentUsingQueryMapTestCases.class,
+	IncrementalDumpTestCases.class,
+	InsertObjectFromMapTestCases.class,
+	InsertObjectTestCases.class,
+	ListCollectionTestCases.class,
+	ListFilesTestCases.class,
+	ListFilesUsingQueryMapTestCases.class,
+	ListIndicesTestCases.class,
+	MapReduceObjectsTestCases.class,
+	PoolingTestCases.class,
+	RemoveFilesTestCases.class,
+	RemoveFilesUsingQueryMapTestCases.class,
+	RemoveObjectsTestCases.class,
+	RemoveObjectsUsingQueryMapTestCases.class,
+	RestoreTestCases.class,
+	SaveObjectFromMapTestCases.class,
+	SaveObjectTestCases.class,
+	UpdateObjectsByFunctionTestCases.class,
+	UpdateObjectsByFunctionUsingMapTestCases.class,
+	UpdateObjectsTestCases.class,
+	UpdateObjectsUsingMapTestCases.class,
+	UpdateObjectsUsingQueryMapTestCases.class
+		})
+
+public class RegressionTestSuite {
+	
 }

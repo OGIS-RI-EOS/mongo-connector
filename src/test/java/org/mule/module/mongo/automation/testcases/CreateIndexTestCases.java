@@ -11,83 +11,65 @@ package org.mule.module.mongo.automation.testcases;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
 import org.mule.module.mongo.api.IndexOrder;
 import org.mule.module.mongo.api.automation.MongoHelper;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.module.mongo.automation.SmokeTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.DBObject;
 
 public class CreateIndexTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
 	@Before
-	public void setUp() {
-		try {
-			testObjects = (HashMap<String, Object>) context.getBean("createIndex");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	public void setUp() throws Exception {
+			initializeTestRunMessage("createIndex");
+			runFlowAndGetPayload("create-collection");
+
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Category({SmokeTests.class, RegressionTests.class})
 	@Test
 	public void testCreateIndex() {
 		try {
 
-			String indexKey = testObjects.get("field").toString();
-			IndexOrder indexOrder = (IndexOrder) testObjects.get("order");
+			String indexKey = getTestRunMessageValue("field").toString();
+			IndexOrder indexOrder = (IndexOrder) getTestRunMessageValue("order");
 			String indexName = indexKey + "_" + indexOrder.getValue();
 	
-			MessageProcessor flow = lookupFlowConstruct("create-index");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-						
-			flow = lookupFlowConstruct("list-indices");
-			response = flow.process(getTestEvent(testObjects));
-			List<DBObject> payload = (ArrayList<DBObject>) response.getMessage().getPayload();
+			runFlowAndGetPayload("create-index");
+		
+			List<DBObject> payload = runFlowAndGetPayload("list-indices");
 								
 			assertTrue(MongoHelper.indexExistsInList(payload, indexName));
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+			
 	}
 	
 	@After
-	public void tearDown() {
-		try {
+	public void tearDown() throws Exception {
 			// Drop the created index
-			String indexKey = testObjects.get("field").toString();
-			IndexOrder indexOrder = (IndexOrder) testObjects.get("order");
+			String indexKey = getTestRunMessageValue("field").toString();
+			IndexOrder indexOrder = (IndexOrder) getTestRunMessageValue("order");
 			
 			String indexName = indexKey + "_" + indexOrder.getValue();
-			testObjects.put("index", indexName);
+			upsertOnTestRunMessage("index", indexName);
 			
-			MessageProcessor flow = lookupFlowConstruct("drop-index");
-			flow.process(getTestEvent(testObjects));
+			runFlowAndGetPayload("drop-index");
 			
 			// Drop the collection
-			flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+			runFlowAndGetPayload("drop-collection");
+
 	}
 
 }

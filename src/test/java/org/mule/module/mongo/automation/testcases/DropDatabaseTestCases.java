@@ -11,59 +11,40 @@ package org.mule.module.mongo.automation.testcases;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 public class DropDatabaseTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
 	@Before
-	public void setUp() {
-		try {
-			testObjects = (HashMap<String, Object>) context.getBean("dropDatabase");
-			MessageProcessor createCollectionFlow = lookupFlowConstruct("save-object-for-drop-restore");
-			createCollectionFlow.process(getTestEvent(testObjects));
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	public void setUp() throws Exception {
+			initializeTestRunMessage("dropDatabase");
+			runFlowAndGetPayload("save-object-for-drop-restore");
 	}
 	
 	@After
-	public void tearDown() {
-		MessageProcessor dropCollectionFlow = lookupFlowConstruct("drop-collection-for-drop-restore");
-		try {
-			dropCollectionFlow.process(getTestEvent(testObjects));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public void tearDown() throws Exception {
+			runFlowAndGetPayload("drop-collection-for-drop-restore");
 	}	
 	
 	
 	@Category({ RegressionTests.class })
 	@Test
 	public void testDropDatabase() {
-		MuleEvent response = null;
 		try {
-			MessageProcessor dropDBFlow = lookupFlowConstruct("drop-database");
-			dropDBFlow.process(getTestEvent(testObjects));
-			
-			MessageProcessor flow = lookupFlowConstruct("exists-collection-for-drop-restore");
-			response = flow.process(getTestEvent(testObjects));
-			
-			Object payload = response.getMessage().getPayload();
-			assertFalse("After dropping the database, the collection " + testObjects.get("collection") + " should not exist", (Boolean)payload);
+			runFlowAndGetPayload("drop-database");
+			assertFalse("After dropping the database, the collection " + getTestRunMessageValue("collection") + " should not exist", 
+					(Boolean) runFlowAndGetPayload("exists-collection-for-drop-restore"));
+
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+			
 	}
 	
 }

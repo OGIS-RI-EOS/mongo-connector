@@ -12,37 +12,35 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
 import org.mule.module.mongo.api.MongoCollection;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 public class RemoveObjectsUsingQueryMapTestCases extends MongoTestParent{
 
-	@SuppressWarnings("unchecked")
+
 	@Before
-	public void setUp() {
-		try {
+	public void setUp() throws Exception {
 			// Create the collection
-			testObjects = (HashMap<String, Object>) context.getBean("removeObjectsUsingQueryMap");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
+			initializeTestRunMessage("removeObjectsUsingQueryMap");
+			runFlowAndGetPayload("create-collection");
+
 
 			// Load variables from testObjects
-			String key = testObjects.get("key").toString();
-			String value = testObjects.get("value").toString();
-			int numberOfObjects = (Integer) testObjects.get("numberOfObjects");
-			int extraObjects = (Integer) testObjects.get("extraObjects");
+			String key = getTestRunMessageValue("key").toString();
+			String value = getTestRunMessageValue("value").toString();
+			int numberOfObjects = (Integer) getTestRunMessageValue("numberOfObjects");
+			int extraObjects = (Integer) getTestRunMessageValue("extraObjects");
 			
 			// Create list of objects, some with key-value pair, some without
 			List<DBObject> objects = new ArrayList<DBObject>();
@@ -56,54 +54,41 @@ public class RemoveObjectsUsingQueryMapTestCases extends MongoTestParent{
 			// Insert objects into collection
 			insertObjects(objects);
 			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+
 	}
 	
 	@After
-	public void tearDown() {
-		try {
+	public void tearDown() throws Exception {
 			// Drop the collection
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+			runFlowAndGetPayload("drop-collection");
+
+
 	}
 	
 	@Category({RegressionTests.class})
 	@Test
 	public void testRemoveUsingQueryMap_WithQueryMap() {
 		try {
-			int extraObjects = (Integer) testObjects.get("extraObjects");
-			String key = testObjects.get("key").toString();
+			int extraObjects = (Integer) getTestRunMessageValue("extraObjects");
+			String key = getTestRunMessageValue("key").toString();
 			
 			// Remove all records matching key-value pair
-			MessageProcessor flow = lookupFlowConstruct("remove-objects-using-query-map-with-query-map");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
+			runFlowAndGetPayload("remove-objects-using-query-map-with-query-map");
 			
 			// Get all objects
-			flow = lookupFlowConstruct("find-objects");
-			response = flow.process(getTestEvent(testObjects));
-			
 			// Only objects which should be returned are those without the key value pairs
-			MongoCollection objects = (MongoCollection) response.getMessage().getPayload();
+			MongoCollection objects = runFlowAndGetPayload("find-objects");
 			assertTrue(objects.size() == extraObjects);
 			
 			// Check that each returned object does not contain the defined key-value pair
 			for (DBObject obj : objects) {
 				assertTrue(!obj.containsField(key));
 			}
-			
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
+
 	}
 
 	@Category({ RegressionTests.class})
@@ -112,19 +97,14 @@ public class RemoveObjectsUsingQueryMapTestCases extends MongoTestParent{
 		try {
 			
 			// Remove all records
-			MessageProcessor flow = lookupFlowConstruct("remove-objects-using-query-map-without-query-map");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
+			runFlowAndGetPayload("remove-objects-using-query-map-without-query-map");
 			
 			// Get all objects
-			flow = lookupFlowConstruct("find-objects");
-			response = flow.process(getTestEvent(testObjects));
-			
-			MongoCollection objects = (MongoCollection) response.getMessage().getPayload();
+			MongoCollection objects = (MongoCollection) runFlowAndGetPayload("find-objects");
 			assertTrue(objects.isEmpty());
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 }

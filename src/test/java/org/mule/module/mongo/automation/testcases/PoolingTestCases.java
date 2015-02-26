@@ -8,70 +8,58 @@
 
 package org.mule.module.mongo.automation.testcases;
 
-import com.mongodb.BasicDBObject;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.MuleMessage;
-import org.mule.api.processor.MessageProcessor;
-import org.mule.api.transport.Connector;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-
-import static org.junit.Assert.*;
+import com.mongodb.BasicDBObject;
 
 public class PoolingTestCases extends MongoTestParent {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void setUp() {
-        try {
+    public void setUp() throws Exception {
             // Create collection
-            testObjects = (HashMap<String, Object>) context.getBean("countObjects");
-            lookupFlowConstruct("create-collection").process(getTestEvent(testObjects));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            fail();
-        }
+            initializeTestRunMessage("countObjects");
+            runFlowAndGetPayload("create-collection");
+
     }
 
     @After
-    public void tearDown() {
-        try {
+    public void tearDown() throws Exception {
             // Delete collection
-            lookupFlowConstruct("drop-collection").process(getTestEvent(testObjects));
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+            runFlowAndGetPayload("drop-collection");
+
     }
 
     @Category({ RegressionTests.class })
     @Test
     public void testPoolSizeDoesNotExceedConfiguration() throws Exception {
 
-        int numObjects = (Integer) testObjects.get("numObjects");
+        int numObjects = (Integer) getTestRunMessageValue("numObjects");
 
         insertObjects(getEmptyDBObjects(numObjects));
 
-        int startingConnections = lookupFlowConstruct("count-open-connections").process(getTestEvent("")).getMessage().getPayload(Integer.class);
-
-        MessageProcessor countFlow = lookupFlowConstruct("count-objects");
-        testObjects.put("queryRef", new BasicDBObject());
+        Integer startingConnections = Integer.parseInt((String) runFlowAndGetPayload("count-open-connections"));
+        
+        upsertOnTestRunMessage("queryRef", new BasicDBObject());
 
         for (int i = 0; i < 32; i++) {
             try {
-                countFlow.process(getTestEvent(testObjects));
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail();
-            }
+            	runFlowAndGetPayload("count-objects");
+    		} catch (Exception e) {
+   	         fail(ConnectorTestUtils.getStackTrace(e));
+   	    }
+
         }
 
-        int newConnections = lookupFlowConstruct("count-open-connections").process(getTestEvent("")).getMessage().getPayload(Integer.class) - startingConnections;
+        int newConnections = Integer.parseInt((String) runFlowAndGetPayload("count-open-connections")) - startingConnections;
         assertTrue("Too many new connections (" + newConnections + ", ", newConnections <= 2);
     }}

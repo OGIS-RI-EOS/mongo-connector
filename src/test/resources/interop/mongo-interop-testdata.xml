@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<connector name="Mongo DB">
+    <global-config>
+        <config>
+            <attributes>
+                <optional caption="Name" group="Basic Settings" javaType="java.lang.String" name="name" type="name"/>
+                <optional caption="Host" default="localhost" group="General" javaType="java.lang.String" name="host" type="string"/>
+                <optional caption="Port" default="27017" group="General" javaType="int" name="port" type="integer"/>
+                <optional caption="Connections Per Host" group="General" javaType="java.lang.Integer" name="connectionsPerHost" type="integer"/>
+                <optional caption="Threads Allowed To Block For Connection Multiplier" group="General" javaType="java.lang.Integer" name="threadsAllowedToBlockForConnectionMultiplier" type="integer"/>
+                <optional caption="Max Wait Time" group="General" javaType="java.lang.Integer" name="maxWaitTime" type="integer"/>
+                <optional caption="Connect Timeout" default="30000" group="General" javaType="java.lang.Integer" name="connectTimeout" type="integer"/>
+                <optional caption="Socket Timeout" group="General" javaType="java.lang.Integer" name="socketTimeout" type="integer"/>
+                <optional caption="Auto Connect Retry" group="General" javaType="java.lang.Boolean" name="autoConnectRetry" type="boolean"/>
+                <optional caption="Username" group="Connection" javaType="java.lang.String" name="username" type="string"/>
+                <optional caption="Password" group="Connection" javaType="java.lang.String" name="password" type="password"/>
+                <optional caption="Database" group="Connection" javaType="java.lang.String" name="database" type="string"/>
+            </attributes>
+        </config>
+    </global-config>
+    <message-processors>
+        <add-user>
+            <attributes>
+                <required caption="New Username" group="General" javaType="java.lang.String" name="newUsername" type="string"/>
+                <required caption="New Password" group="General" javaType="java.lang.String" name="newPassword" type="string"/>
+            </attributes>
+        </add-user>
+        <drop-database/>
+        <list-collections/>
+        <exists-collection>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+            </attributes>
+        </exists-collection>
+        <drop-collection>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+            </attributes>
+        </drop-collection>
+        <create-collection>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Capped" default="false" group="General" javaType="boolean" name="capped" type="boolean"/>
+                <optional caption="Max Objects" group="General" javaType="java.lang.Integer" name="maxObjects" type="integer"/>
+                <optional caption="Size" group="General" javaType="java.lang.Integer" name="size" type="integer"/>
+            </attributes>
+        </create-collection>
+        <insert-object>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Db Object Reference" default="#[payload]" group="General" javaType="com.mongodb.DBObject" name="dbObject-ref" type="string"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+        </insert-object>
+        <insert-object-from-map>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+            <childElements/>
+        </insert-object-from-map>
+        <update-objects>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <required caption="Query Reference" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+                <optional caption="Element Reference" default="#[payload]" group="General" javaType="com.mongodb.DBObject" name="element-ref" type="string"/>
+                <optional caption="Upsert" default="false" group="General" javaType="boolean" name="upsert" type="boolean"/>
+                <optional caption="Multi" default="true" group="General" javaType="boolean" name="multi" type="boolean"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+        </update-objects>
+        <update-objects-using-query-map>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <required caption="Element Reference" group="General" javaType="com.mongodb.DBObject" name="element-ref" type="string"/>
+                <optional caption="Upsert" default="false" group="General" javaType="boolean" name="upsert" type="boolean"/>
+                <optional caption="Multi" default="true" group="General" javaType="boolean" name="multi" type="boolean"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+            <childElements/>
+        </update-objects-using-query-map>
+        <update-objects-using-map>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Upsert" default="false" group="General" javaType="boolean" name="upsert" type="boolean"/>
+                <optional caption="Multi" default="true" group="General" javaType="boolean" name="multi" type="boolean"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+            <childElements/>
+        </update-objects-using-map>
+        <update-objects-by-function>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <required caption="Function" group="General" javaType="java.lang.String" name="function" type="string"/>
+                <required caption="Query Reference" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+                <required caption="Element Reference" group="General" javaType="com.mongodb.DBObject" name="element-ref" type="string"/>
+                <optional caption="Upsert" default="false" group="General" javaType="boolean" name="upsert" type="boolean"/>
+                <optional caption="Multi" default="true" group="General" javaType="boolean" name="multi" type="boolean"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+        </update-objects-by-function>
+        <update-objects-by-function-using-map>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <required caption="Function" group="General" javaType="java.lang.String" name="function" type="string"/>
+                <optional caption="Upsert" default="false" group="General" javaType="boolean" name="upsert" type="boolean"/>
+                <optional caption="Multi" default="true" group="General" javaType="boolean" name="multi" type="boolean"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+            <childElements/>
+        </update-objects-by-function-using-map>
+        <save-object>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Element Reference" default="#[payload]" group="General" javaType="com.mongodb.DBObject" name="element-ref" type="string"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+        </save-object>
+        <save-object-from-map>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+            <childElements/>
+        </save-object-from-map>
+        <remove-objects>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Query Reference" default="#[payload]" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+        </remove-objects>
+        <remove-objects-using-query-map>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Write Concern" default="DATABASE_DEFAULT" group="General" javaType="org.mule.module.mongo.api.WriteConcern" name="writeConcern" type="enum"/>
+            </attributes>
+            <childElements/>
+        </remove-objects-using-query-map>
+        <map-reduce-objects>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <required caption="Map Function" group="General" javaType="java.lang.String" name="mapFunction" type="string"/>
+                <required caption="Reduce Function" group="General" javaType="java.lang.String" name="reduceFunction" type="string"/>
+                <optional caption="Output Collection" group="General" javaType="java.lang.String" name="outputCollection" type="string"/>
+            </attributes>
+        </map-reduce-objects>
+        <count-objects>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Query Reference" default="#[payload]" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+            </attributes>
+        </count-objects>
+        <count-objects-using-query-map>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+            </attributes>
+            <childElements/>
+        </count-objects-using-query-map>
+        <find-objects>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Query Reference" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+                <optional caption="Num To Skip" group="General" javaType="java.lang.Integer" name="numToSkip" type="integer"/>
+                <optional caption="Limit" group="General" javaType="java.lang.Integer" name="limit" type="integer"/>
+            </attributes>
+            <childElements/>
+        </find-objects>
+        <find-objects-using-query-map>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Num To Skip" group="General" javaType="java.lang.Integer" name="numToSkip" type="integer"/>
+                <optional caption="Limit" group="General" javaType="java.lang.Integer" name="limit" type="integer"/>
+            </attributes>
+            <childElements/>
+        </find-objects-using-query-map>
+        <find-one-object>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Query Reference" default="#[payload]" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+                <optional caption="Fail On Not Found" default="true" group="General" javaType="java.lang.Boolean" name="failOnNotFound" type="boolean"/>
+            </attributes>
+            <childElements/>
+        </find-one-object>
+        <find-one-object-using-query-map>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <optional caption="Fail On Not Found" default="true" group="General" javaType="java.lang.Boolean" name="failOnNotFound" type="boolean"/>
+            </attributes>
+            <childElements/>
+        </find-one-object-using-query-map>
+        <create-index>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <required caption="Field" group="General" javaType="java.lang.String" name="field" type="string"/>
+                <optional caption="Order" default="ASC" group="General" javaType="org.mule.module.mongo.api.IndexOrder" name="order" type="enum"/>
+            </attributes>
+        </create-index>
+        <drop-index>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+                <required caption="Index" group="General" javaType="java.lang.String" name="index" type="string"/>
+            </attributes>
+        </drop-index>
+        <list-indices>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string"/>
+            </attributes>
+        </list-indices>
+        <create-file-from-payload>
+            <attributes>
+                <required caption="Filename" group="General" javaType="java.lang.String" name="filename" type="string"/>
+                <optional caption="Content Type" group="General" javaType="java.lang.String" name="contentType" type="string"/>
+                <optional caption="Metadata Reference" group="General" javaType="com.mongodb.DBObject" name="metadata-ref" type="string"/>
+            </attributes>
+        </create-file-from-payload>
+        <find-files>
+            <attributes>
+                <optional caption="Query Reference" default="#[payload]" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+            </attributes>
+        </find-files>
+        <find-files-using-query-map>
+            <attributes/>
+            <childElements/>
+        </find-files-using-query-map>
+        <find-one-file>
+            <attributes>
+                <required caption="Query Reference" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+            </attributes>
+        </find-one-file>
+        <find-one-file-using-query-map>
+            <attributes/>
+            <childElements/>
+        </find-one-file-using-query-map>
+        <get-file-content>
+            <attributes>
+                <optional caption="Query Reference" default="#[payload]" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+            </attributes>
+        </get-file-content>
+        <get-file-content-using-query-map>
+            <attributes/>
+            <childElements/>
+        </get-file-content-using-query-map>
+        <list-files>
+            <attributes>
+                <optional caption="Query Reference" default="#[payload]" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+            </attributes>
+        </list-files>
+        <list-files-using-query-map>
+            <attributes/>
+            <childElements/>
+        </list-files-using-query-map>
+        <remove-files>
+            <attributes>
+                <optional caption="Query Reference" default="#[payload]" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string"/>
+            </attributes>
+        </remove-files>
+        <remove-files-using-query-map>
+            <attributes/>
+            <childElements/>
+        </remove-files-using-query-map>
+        <execute-command>
+            <attributes>
+                <required caption="Command Name" group="General" javaType="java.lang.String" name="commandName" type="string"/>
+                <optional caption="Command Value" group="General" javaType="java.lang.String" name="commandValue" type="string"/>
+            </attributes>
+        </execute-command>
+        <dump>
+            <attributes>
+                <optional caption="Output Directory" default="dump" group="General" javaType="java.lang.String" name="outputDirectory" type="string"/>
+                <optional caption="Output Name" group="General" javaType="java.lang.String" name="outputName" type="string"/>
+                <optional caption="Zip" default="false" group="General" javaType="boolean" name="zip" type="boolean"/>
+                <optional caption="Oplog" default="false" group="General" javaType="boolean" name="oplog" type="boolean"/>
+                <optional caption="Threads" default="5" group="General" javaType="int" name="threads" type="integer"/>
+            </attributes>
+        </dump>
+        <incremental-dump>
+            <attributes>
+                <optional caption="Output Directory" default="dump" group="General" javaType="java.lang.String" name="outputDirectory" type="string"/>
+                <optional caption="Incremental Timestamp File" group="General" javaType="java.lang.String" name="incrementalTimestampFile" type="string"/>
+            </attributes>
+        </incremental-dump>
+        <restore>
+            <attributes>
+                <optional caption="Input Path" default="dump" group="General" javaType="java.lang.String" name="inputPath" type="string"/>
+                <optional caption="Drop" default="false" group="General" javaType="boolean" name="drop" type="boolean"/>
+                <optional caption="Oplog Replay" default="false" group="General" javaType="boolean" name="oplogReplay" type="boolean"/>
+            </attributes>
+        </restore>
+        <start-consistent-request/>
+        <end-consistent-request/>
+    </message-processors>
+    <inbound-endpoint/>
+    <outbound-endpoints/>
+</connector>

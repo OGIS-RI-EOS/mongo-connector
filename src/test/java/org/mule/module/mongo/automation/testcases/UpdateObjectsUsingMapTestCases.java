@@ -12,34 +12,33 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
 import org.mule.module.mongo.api.MongoCollection;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 public class UpdateObjectsUsingMapTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
-	@Before
-	public void setUp() {
-		try {
-			// Create the collection
-			testObjects = (HashMap<String, Object>) context.getBean("updateObjectsUsingMap");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
 
-			String queryKey = testObjects.get("queryKey").toString();
-			String queryValue = testObjects.get("queryValue").toString();
-			int numberOfObjects = (Integer) testObjects.get("numberOfObjects");
+	@Before
+	public void setUp() throws Exception {
+			// Create the collection
+			initializeTestRunMessage("updateObjectsUsingMap");
+			runFlowAndGetPayload("create-collection");
+
+
+			String queryKey = getTestRunMessageValue("queryKey").toString();
+			String queryValue = getTestRunMessageValue("queryValue").toString();
+			int numberOfObjects = (Integer) getTestRunMessageValue("numberOfObjects");
 			
 			// Create the objects with the key-value pair
 			List<DBObject> objects = new ArrayList<DBObject>();
@@ -51,52 +50,38 @@ public class UpdateObjectsUsingMapTestCases extends MongoTestParent {
 			// Insert the objects
 			insertObjects(objects);
 			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+
 	}
 
 	@Category({RegressionTests.class})
 	@Test
 	public void testUpdateObjectsUsingMap() {
 		try {
-			String elementKey = testObjects.get("elementKey").toString();
-			String elementValue = testObjects.get("elementValue").toString();
-			int numberOfObjects = (Integer) testObjects.get("numberOfObjects");
+			String elementKey = getTestRunMessageValue("elementKey").toString();
+			String elementValue = getTestRunMessageValue("elementValue").toString();
+			int numberOfObjects = (Integer) getTestRunMessageValue("numberOfObjects");
 			
 			// Update objects
-			MessageProcessor flow = lookupFlowConstruct("update-objects-using-map");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
+			runFlowAndGetPayload("update-objects-using-map");
 			
 			// Get all objects
-			flow = lookupFlowConstruct("find-objects");
-			response = flow.process(getTestEvent(testObjects));
-			
-			MongoCollection objects = (MongoCollection) response.getMessage().getPayload();
+			MongoCollection objects = runFlowAndGetPayload("find-objects");
 			for (DBObject obj : objects) {
 				assertTrue(obj.containsField(elementKey));
 				assertTrue(obj.get(elementKey).equals(elementValue));
 			}
 			assertTrue(objects.size() == numberOfObjects);
-			
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 	
 	@After
-	public void tearDown() {
-		try {
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+	public void tearDown() throws Exception {
+			runFlowAndGetPayload("drop-collection");
+
+
 	}
 
 	

@@ -6,9 +6,9 @@
  * LICENSE.md file.
  */
 
-package org.mule.module.mongo.automation.testcases;
+package org.mule.module.mongo.automation;
 
-public interface RegressionTests {
+public interface SmokeTests {
 
 	/* category marker */ 
 

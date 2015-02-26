@@ -11,28 +11,21 @@ package org.mule.module.mongo.automation.testcases;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.module.mongo.automation.SmokeTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 public class DropCollectionTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
 	@Before
-	public void setUp() {
-		try {
-			testObjects = (HashMap<String, Object>) context.getBean("dropCollection");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	public void setUp() throws Exception {
+			initializeTestRunMessage("dropCollection");
+			runFlowAndGetPayload("create-collection");
+
 	}
 	
 	@Category({SmokeTests.class, RegressionTests.class})
@@ -40,20 +33,13 @@ public class DropCollectionTestCases extends MongoTestParent {
 	public void testDropCollection() {
 		
 		try {
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
+			runFlowAndGetPayload("drop-collection");
+			assertFalse((Boolean) runFlowAndGetPayload("exists-collection"));
 			
-			flow = lookupFlowConstruct("exists-collection");
-			response = flow.process(getTestEvent(testObjects));
-			
-			Object payload = response.getMessage().getPayload();
-			assertFalse((Boolean)payload);
-			
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 	
 	

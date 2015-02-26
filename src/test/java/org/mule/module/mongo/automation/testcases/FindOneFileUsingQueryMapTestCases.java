@@ -11,27 +11,26 @@ package org.mule.module.mongo.automation.testcases;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.DBObject;
 
 public class FindOneFileUsingQueryMapTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
+
 	@Before
 	public void setUp() {
-		testObjects = (HashMap<String, Object>) context.getBean("findOneFileUsingQueryMap");
+		initializeTestRunMessage("findOneFileUsingQueryMap");
 
-		createFileFromPayload(testObjects.get("filename1"));
-		createFileFromPayload(testObjects.get("filename1"));
-		createFileFromPayload(testObjects.get("filename2"));
+		createFileFromPayload(getTestRunMessageValue("filename1"));
+		createFileFromPayload(getTestRunMessageValue("filename1"));
+		createFileFromPayload(getTestRunMessageValue("filename2"));
 	}
 
 	@After
@@ -43,18 +42,14 @@ public class FindOneFileUsingQueryMapTestCases extends MongoTestParent {
 	@Test
 	public void testFindOneFileUsingQueryMap() {
 		try {
-			MessageProcessor findOneUsingQueryMapFile = lookupFlowConstruct("find-one-file-using-query-map");
+			DBObject dbObj = runFlowAndGetPayload("find-one-file-using-query-map");
 			
-			MuleEvent response = findOneUsingQueryMapFile.process(getTestEvent(testObjects));
-			
-			DBObject dbObj = (DBObject) response.getMessage().getPayload();
-			
-			assertEquals("The file found should have the name " + testObjects.get("filename1"), testObjects.get("filename1"), dbObj.get("filename"));
+			assertEquals("The file found should have the name " + getTestRunMessageValue("filename1"), getTestRunMessageValue("filename1"), dbObj.get("filename"));
 			assertEquals("There should be 3 files in total", 3, findFiles());
+
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
 		
 	}
 

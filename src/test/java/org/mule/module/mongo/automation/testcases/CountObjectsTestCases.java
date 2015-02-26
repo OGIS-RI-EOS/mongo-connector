@@ -11,61 +11,43 @@ package org.mule.module.mongo.automation.testcases;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.BasicDBObject;
 
 public class CountObjectsTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
 	@Before
-	public void setUp() {
-		try {
+	public void setUp() throws Exception {
 			// Create collection
-			testObjects = (HashMap<String, Object>) context.getBean("countObjects");
-			lookupFlowConstruct("create-collection").process(getTestEvent(testObjects));
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+			initializeTestRunMessage("countObjects");
+			runFlowAndGetPayload("create-collection");
 	}
 
 	@After
-	public void tearDown() {
-		try {
+	public void tearDown() throws Exception {
 			// Delete collection
-			lookupFlowConstruct("drop-collection").process(getTestEvent(testObjects));
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+			runFlowAndGetPayload("drop-collection");
+
 	}
 
 	@Category({ RegressionTests.class })
 	@Test
 	public void testCountObjects() {
-		
-		int numObjects = (Integer) testObjects.get("numObjects");
-		
+		Integer numObjects = getTestRunMessageValue("numObjects");
 		insertObjects(getEmptyDBObjects(numObjects));
-		
-		MuleEvent response = null;
 		try {
-			MessageProcessor countFlow = lookupFlowConstruct("count-objects");
-			testObjects.put("queryRef", new BasicDBObject());
-			response = countFlow.process(getTestEvent(testObjects));
+			upsertOnTestRunMessage("queryRef", new BasicDBObject());
+			assertEquals(new Long(numObjects), (Long) runFlowAndGetPayload("count-objects"));
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-		assertEquals(new Long(numObjects), response.getMessage().getPayload());
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
 	}
 	
 }

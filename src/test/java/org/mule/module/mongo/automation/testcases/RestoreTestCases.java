@@ -24,90 +24,68 @@ import org.mule.api.MuleEvent;
 import org.mule.api.processor.MessageProcessor;
 import org.mule.module.mongo.api.IndexOrder;
 import org.mule.module.mongo.api.automation.MongoHelper;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.DBObject;
 
 public class RestoreTestCases extends MongoTestParent {
 	
-	@SuppressWarnings("unchecked")
+
 	@Before
-	public void setUp() {
-		testObjects = (HashMap<String, Object>) context.getBean("restore");
-		try {
-			String indexKey = testObjects.get("field").toString();
-			IndexOrder indexOrder = (IndexOrder) testObjects.get("order");
-			
-			String indexName = MongoHelper.getIndexName(indexKey, indexOrder);
-			
-			MessageProcessor restoreTestCaseSetupFlow = lookupFlowConstruct("createIndex_Dump");
-			restoreTestCaseSetupFlow.process(getTestEvent(testObjects));
-			
-			// drop index
-			testObjects.put("index", indexName);
-			MessageProcessor dropIndexFlow = lookupFlowConstruct("drop-index-for-drop-restore");
-			try {
-				dropIndexFlow.process(getTestEvent(testObjects));
-			} catch (Exception e) {
-				e.printStackTrace();
-				fail();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	public void setUp() throws Exception {
+		initializeTestRunMessage("restore");
+		String indexKey = getTestRunMessageValue("field").toString();
+		IndexOrder indexOrder = (IndexOrder) getTestRunMessageValue("order");
+		
+		String indexName = MongoHelper.getIndexName(indexKey, indexOrder);
+		
+		runFlowAndGetPayload("createIndex_Dump");
+		
+		// drop index
+		upsertOnTestRunMessage("index", indexName);
+
+		runFlowAndGetPayload("drop-index-for-drop-restore");
+
 	}
 	
 	@After
-	public void tearDown() {
-		try {
-			File dumpOutputDir = new File("./" + testObjects.get("outputDirectory"));
+	public void tearDown() throws Exception {
+			File dumpOutputDir = new File("./" + getTestRunMessageValue("outputDirectory"));
 			FileUtils.deleteDirectory(dumpOutputDir);
 			
-			String indexKey = testObjects.get("field").toString();
-			IndexOrder indexOrder = (IndexOrder) testObjects.get("order");
+			String indexKey = getTestRunMessageValue("field").toString();
+			IndexOrder indexOrder = (IndexOrder) getTestRunMessageValue("order");
 			
 			String indexName = MongoHelper.getIndexName(indexKey, indexOrder);
 			
 			// drop index
-			testObjects.put("index", indexName);			
-			MessageProcessor dropIndexFlow = lookupFlowConstruct("drop-index-for-drop-restore");
-			try {
-				dropIndexFlow.process(getTestEvent(testObjects));
-				// Need to drop the collection becuase creating the index creates the collection
-				lookupFlowConstruct("drop-collection-for-drop-restore").process(getTestEvent(testObjects));
-			} catch (Exception e) {
-				e.printStackTrace();
-				fail();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+			upsertOnTestRunMessage("index", indexName);			
+			runFlowAndGetPayload("drop-index-for-drop-restore");
+			// Need to drop the collection becuase creating the index creates the collection
+			runFlowAndGetPayload("drop-collection-for-drop-restore");
+
 	}
 	
-	@SuppressWarnings("unchecked")
+
 	@Category({RegressionTests.class})
 	@Test
 	public void testRestore() {
 		try {
-			MessageProcessor restoreFlow = lookupFlowConstruct("restore");
+			runFlowAndGetPayload("restore");
 			
-			restoreFlow.process(getTestEvent(testObjects));
-			
-			String indexKey = testObjects.get("field").toString();
-			IndexOrder indexOrder = (IndexOrder) testObjects.get("order");
+			String indexKey = getTestRunMessageValue("field").toString();
+			IndexOrder indexOrder = (IndexOrder) getTestRunMessageValue("order");
 			
 			String indexName = MongoHelper.getIndexName(indexKey, indexOrder);
 			
-			MessageProcessor listIndicesFlow = lookupFlowConstruct("list-indices-for-drop-restore");
-			MuleEvent responseEvent = listIndicesFlow.process(getTestEvent(testObjects));
-			
-			List<DBObject> payload = (List<DBObject>) responseEvent.getMessage().getPayload();
+			List<DBObject> payload = runFlowAndGetPayload("list-indices-for-drop-restore");
 			
 			assertTrue("After restoring the database, the index with index name = " + indexName + " should exist", MongoHelper.indexExistsInList(payload, indexName));
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
 	}
+	
 }

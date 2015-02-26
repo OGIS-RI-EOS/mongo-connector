@@ -12,31 +12,23 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.CommandResult;
 
 public class ExecuteCommandTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
 	@Before
-	public void setUp() {
-		try {
+	public void setUp() throws Exception {
 			// Get the collectionName and create a collection
-			testObjects = (HashMap<String, Object>) context.getBean("executeCommand");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));	
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+			initializeTestRunMessage("executeCommand");
+			runFlowAndGetPayload("create-collection");
+
 	}
 	
 	@Category({ RegressionTests.class})
@@ -44,20 +36,15 @@ public class ExecuteCommandTestCases extends MongoTestParent {
 	public void testExecuteCommand() {
 		try {
 			// Drop the collection using command
-			MessageProcessor flow = lookupFlowConstruct("execute-command");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-			CommandResult cmdResult = (CommandResult) response.getMessage().getPayload();
+			CommandResult cmdResult = runFlowAndGetPayload("execute-command");
 			assertTrue(cmdResult.ok());
 			
-			flow = lookupFlowConstruct("exists-collection");
-			response = flow.process(getTestEvent(testObjects));
-			Boolean exists = (Boolean) response.getMessage().getPayload();
+			Boolean exists = runFlowAndGetPayload("exists-collection");
 			assertFalse(exists);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 		
 }

@@ -19,17 +19,20 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mule.api.MuleEvent;
 import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 public class RemoveFilesUsingQueryMapTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
+
 	@Before
 	public void setUp() {
-		testObjects = (HashMap<String, Object>) context.getBean("removeFilesUsingQueryMap");
+		initializeTestRunMessage("removeFilesUsingQueryMap");
 		
-		createFileFromPayload(testObjects.get("filename1"));
-		createFileFromPayload(testObjects.get("filename1"));
-		createFileFromPayload(testObjects.get("filename2"));
+		createFileFromPayload(getTestRunMessageValue("filename1"));
+		createFileFromPayload(getTestRunMessageValue("filename1"));
+		createFileFromPayload(getTestRunMessageValue("filename2"));
 	}
 	
 	@After
@@ -41,16 +44,13 @@ public class RemoveFilesUsingQueryMapTestCases extends MongoTestParent {
 	@Test
 	public void testRemoveFilesUsingQueryMap_emptyQuery() {
 		try {
-			MessageProcessor removeFilesFlow = lookupFlowConstruct("remove-files-using-query-map-empty-query");
-			MuleEvent event = getTestEvent(testObjects);
-			removeFilesFlow.process(event);
-
+			runFlowAndGetPayload("remove-files-using-query-map-empty-query");
 			assertEquals("There should be 0 files found after remove-files-using-query-map with an empty query", 0,
 					findFiles());
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 
 	}
 
@@ -58,16 +58,13 @@ public class RemoveFilesUsingQueryMapTestCases extends MongoTestParent {
 	@Test
 	public void testRemoveFilesUsingQueryMap_nonemptyQuery() {
 		try {
-			MessageProcessor removeFilesFlow = lookupFlowConstruct("remove-files-using-query-map-non-empty-query");
-			MuleEvent event = getTestEvent(testObjects);
-			removeFilesFlow.process(event);
-
-			assertEquals("There should be 1 files found after removing files with a filename of " + testObjects.get("value"), 1,
+			runFlowAndGetPayload("remove-files-using-query-map-non-empty-query");
+			assertEquals("There should be 1 files found after removing files with a filename of " + getTestRunMessageValue("value"), 1,
 					findFiles());
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 
 	}
 

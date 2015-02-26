@@ -13,35 +13,34 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
 import org.mule.module.mongo.api.MongoCollection;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.module.mongo.automation.SmokeTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 public class FindObjectsUsingQueryMapTestCases extends MongoTestParent {
 			
-	@SuppressWarnings("unchecked")
+
 	@Before
-	public void setUp() {
-		try {
+	public void setUp() throws Exception {
 			// create collection
-			testObjects = (Map<String, Object>) context.getBean("findObjectsUsingQueryMap");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
+			initializeTestRunMessage("findObjectsUsingQueryMap");
+			runFlowAndGetPayload("create-collection");
 			
 			// Create a number of objects
-			int extraObjects = (Integer) testObjects.get("extraObjects");
-			int numberOfObjects = (Integer) testObjects.get("numObjects");
-			String queryKey = testObjects.get("queryKey").toString();
-			String queryValue = testObjects.get("queryValue").toString();
+			int extraObjects = (Integer) getTestRunMessageValue("extraObjects");
+			int numberOfObjects = (Integer) getTestRunMessageValue("numObjects");
+			String queryKey = getTestRunMessageValue("queryKey").toString();
+			String queryValue = getTestRunMessageValue("queryValue").toString();
 			
 			List<DBObject> objects = new ArrayList<DBObject>();
 			for (int i = 0; i < numberOfObjects; i++) {
@@ -55,57 +54,45 @@ public class FindObjectsUsingQueryMapTestCases extends MongoTestParent {
 			
 			insertObjects(objects);			
 			
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+
 	}
 
 	@Category({SmokeTests.class, RegressionTests.class})
 	@Test
 	public void testFindObjectsUsingQueryMap_WithQuery() {
 		try {
-			int numberOfObjects = (Integer) testObjects.get("numObjects");
-			String queryKey = testObjects.get("queryKey").toString();
-			String queryValue = testObjects.get("queryValue").toString();
+			int numberOfObjects = (Integer) getTestRunMessageValue("numObjects");
+			String queryKey = getTestRunMessageValue("queryKey").toString();
+			String queryValue = getTestRunMessageValue("queryValue").toString();
 			
-			MessageProcessor flow = lookupFlowConstruct("find-objects-using-query-map-with-query");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-			
-			MongoCollection collection = (MongoCollection) response.getMessage().getPayload();
+			MongoCollection collection = runFlowAndGetPayload("find-objects-using-query-map-with-query");
 			
 			assertTrue(numberOfObjects == collection.size());
 			for (DBObject obj : collection) {
 				assertTrue(obj.containsField(queryKey));
 				assertTrue(obj.get(queryKey).equals(queryValue));
 			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 	
 	@Category({RegressionTests.class})
 	@Test
 	public void testFindObjectsUsingQueryMap_WithoutQuery() {
 		try {
-			int extraObjects = (Integer) testObjects.get("extraObjects");
-			int numberOfObjects = (Integer) testObjects.get("numObjects");
+			int extraObjects = (Integer) getTestRunMessageValue("extraObjects");
+			int numberOfObjects = (Integer) getTestRunMessageValue("numObjects");
 			
-			MessageProcessor flow = lookupFlowConstruct("find-objects-using-query-map-without-query");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-			
-			MongoCollection collection = (MongoCollection) response.getMessage().getPayload();
+			MongoCollection collection = runFlowAndGetPayload("find-objects-using-query-map-without-query");
 			
 			// Assert that everything was retrieved (empty objects + key-value pair objects)
 			assertTrue(numberOfObjects + extraObjects == collection.size());
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 
 	@Category({RegressionTests.class})
@@ -113,32 +100,23 @@ public class FindObjectsUsingQueryMapTestCases extends MongoTestParent {
 	public void testFindObjectsUsingQueryMap_WithLimit() {
 		try {
 		
-			int limit = (Integer) testObjects.get("limit");
+			int limit = (Integer) getTestRunMessageValue("limit");
 			
-			MessageProcessor flow = lookupFlowConstruct("find-objects-using-query-map-with-limit");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-			
-			MongoCollection collection = (MongoCollection) response.getMessage().getPayload();
+			MongoCollection collection = runFlowAndGetPayload("find-objects-using-query-map-with-limit");
 			
 			// Assert that only "limit" objects were retrieved
 			assertTrue(limit == collection.size());
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+			
 	}
 	
 	@After
-	public void tearDown() {
-		try {
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	public void tearDown() throws Exception {
+			runFlowAndGetPayload("drop-collection");
+
+
 	}
 	
 }

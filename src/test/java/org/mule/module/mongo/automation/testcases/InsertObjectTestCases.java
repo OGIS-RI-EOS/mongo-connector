@@ -11,56 +11,40 @@ package org.mule.module.mongo.automation.testcases;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleMessage;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.module.mongo.automation.SmokeTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 public class InsertObjectTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
+
 	@Before
-	public void setUp() {
-		try {
-			testObjects = (HashMap<String, Object>) context.getBean("insertObject");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+	public void setUp() throws Exception {
+			initializeTestRunMessage("insertObject");
+			runFlowAndGetPayload("create-collection");
 	}
 
 	@Category({SmokeTests.class, RegressionTests.class})
 	@Test
 	public void testInsertObject() {
 		try {
-			MessageProcessor flow = lookupFlowConstruct("insert-object");
-			MuleMessage message = flow.process(getTestEvent(testObjects)).getMessage();
-			String objectID = message.getPayload().toString();
+			String objectID = runFlowAndGetPayload("insert-object");
 			
 			assertTrue(objectID != null && !objectID.equals("") && !objectID.trim().equals(""));
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 	
 	@After
-	public void tearDown() {
-		try {
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+	public void tearDown() throws Exception {
+			runFlowAndGetPayload("drop-collection");
 	}
 
 }

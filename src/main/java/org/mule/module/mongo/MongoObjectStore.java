@@ -264,6 +264,16 @@ public class MongoObjectStore implements PartitionableExpirableObjectStore<Seria
         mongoClient.dropCollection(collection);
     }
 
+    @Override
+    public void clear(String s) throws ObjectStoreException {
+        // NOOP
+    }
+
+    @Override
+    public void clear() throws ObjectStoreException {
+        // NOOP
+    }
+
     public void expire(final int entryTTL, final int ignored_maxEntries, final String partitionName)
         throws ObjectStoreException
     {

@@ -12,74 +12,58 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.MuleMessage;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 public class ListCollectionTestCases extends MongoTestParent {
 
 	private List<String> collectionNames;
 	
-	@SuppressWarnings("unchecked")
+
 	@Before
-	public void setUp() {
-		try {
-			testObjects = new HashMap<String, Object>();
-			collectionNames = (List<String>) context.getBean("listCollections");
-			
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
+	public void setUp() throws Exception {
+			initializeTestRunMessage("collection","collectionName");
+			collectionNames = getBeanFromContext("listCollections");
+
 			for (String collectionName : collectionNames) {
-				testObjects.put("collection", collectionName);
-				flow.process(getTestEvent(testObjects));
+				upsertOnTestRunMessage("collection", collectionName);
+				runFlowAndGetPayload("create-collection");
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+
 	}
 
-	@SuppressWarnings("unchecked")
+
 	@Category({ RegressionTests.class})
 	@Test
 	public void testListCollections() {
 		try {
-			MessageProcessor flow = lookupFlowConstruct("list-collections");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-			MuleMessage message = response.getMessage();
-			Collection<String> payload = (Collection<String>) message.getPayload();
+			Collection<String> payload = runFlowAndGetPayload("list-collections");
 			
 			for (String collectionName : collectionNames) {
 				assertTrue(payload.contains(collectionName));
 			}
 			
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+			
+
 	}
 	
 	@After
-	public void tearDown() {
-		try {
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-
+	public void tearDown() throws Exception {
 			for (String collectionName : collectionNames) {
-				testObjects.put("collection", collectionName);
-				flow.process(getTestEvent(testObjects));
+				upsertOnTestRunMessage("collection", collectionName);
+				runFlowAndGetPayload("drop-collection");
 			}
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+
 	}
 
 }

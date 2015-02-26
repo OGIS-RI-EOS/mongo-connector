@@ -12,42 +12,33 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.module.mongo.automation.SmokeTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.DBObject;
 
 public class SaveObjectFromMapTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
+
 	@Before
-	public void setUp() {
-		try {
-			testObjects = (Map<String, Object>) context.getBean("saveObjectFromMap");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+	public void setUp() throws Exception {
+			initializeTestRunMessage("saveObjectFromMap");
+			runFlowAndGetPayload("create-collection");
+
+
 	}
 	
 	@After
-	public void tearDown() {
-		try {
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+	public void tearDown() throws Exception {
+			runFlowAndGetPayload("drop-collection");
+
+
 	}
 	
 	@Category({SmokeTests.class, RegressionTests.class})
@@ -55,39 +46,30 @@ public class SaveObjectFromMapTestCases extends MongoTestParent {
 	public void testSaveObjectFromMap() {
 		try {
 		
-			String key = testObjects.get("key").toString();
-			String value = testObjects.get("value").toString();
+			String key = getTestRunMessageValue("key").toString();
+			String value = getTestRunMessageValue("value").toString();
 		
 			// Save object to MongoDB
-			MessageProcessor flow = lookupFlowConstruct("save-object-from-map");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
+			runFlowAndGetPayload("save-object-from-map");
 			
 			// Check whether it was saved			
-			flow = lookupFlowConstruct("find-one-object-using-query-map");
-			response = flow.process(getTestEvent(testObjects));
-						
-			DBObject object = (DBObject) response.getMessage().getPayload();
+			DBObject object = (DBObject) runFlowAndGetPayload("find-one-object-using-query-map");
 			assertTrue(object.containsField(key));
 			assertTrue(object.get(key).equals(value));
 			
 			// Modify object and save to MongoDB
-			testObjects.put("value", "differentValue");
-			String differentValue = testObjects.get("value").toString();
-			flow = lookupFlowConstruct("save-object-from-map");
-			response = flow.process(getTestEvent(testObjects));
+			upsertOnTestRunMessage("value", "differentValue");
+			String differentValue = getTestRunMessageValue("value").toString();
+			runFlowAndGetPayload("save-object-from-map");
 			
 			// Check that modifications were saved
-			flow = lookupFlowConstruct("find-one-object-using-query-map");
-			response = flow.process(getTestEvent(testObjects));
-						
-			object = (DBObject) response.getMessage().getPayload();
+			object = runFlowAndGetPayload("find-one-object-using-query-map");
 			assertTrue(object.containsField(key));
 			assertFalse(object.get(key).equals(value));
 			assertTrue(object.get(key).equals(differentValue));
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 }

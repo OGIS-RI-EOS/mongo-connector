@@ -11,21 +11,22 @@ package org.mule.module.mongo.automation.testcases;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.module.mongo.automation.SmokeTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.gridfs.GridFSInputFile;
 
 public class CreateFileFromPayloadTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() {
-		testObjects = (HashMap<String, Object>) context.getBean("createFileFromPayload");
+		initializeTestRunMessage("createFileFromPayload");
 	}
 	
 	@After
@@ -39,15 +40,16 @@ public class CreateFileFromPayloadTestCases extends MongoTestParent {
 		try {
 			assertEquals("There should be 0 files found before create-file-from-payload", 0, findFiles());
 			
-			GridFSInputFile res = createFileFromPayload(testObjects.get("filename1"));
+			GridFSInputFile res = createFileFromPayload(getTestRunMessageValue("filename1"));
 			
-			assertEquals("The created file should be named " + testObjects.get("filename1"), testObjects.get("filename1"), res.getFilename());
+			assertEquals("The created file should be named " + getTestRunMessageValue("filename1"), getTestRunMessageValue("filename1"), res.getFilename());
 			assertEquals("There should be 1 files found after create-file-from-payload", 1, findFiles());
 			
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
+			
 	}
 	
 }

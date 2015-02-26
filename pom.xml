@@ -3,23 +3,24 @@
     <parent>
         <groupId>org.mule.tools.devkit</groupId>
         <artifactId>mule-devkit-parent</artifactId>
-        <version>3.4.2</version>
+        <version>3.5.1</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mule.modules</groupId>
     <artifactId>mule-module-mongo</artifactId>
+    <version>3.5.1-throttle</version>
     <packaging>mule-module</packaging>
     <name>Mule Mongo Connector</name>
-    <version>3.4.2-SNAPSHOT</version>
     <description>Mule Cloud connector to mongo</description>
-    <url>http://www.muleforge.org/projects/mule-module-mongo</url>
+    <url>https://github.com/OGIS-RI-EOS/mongo-connector</url>
 
     <properties>
-        <mongo.version>2.11.2</mongo.version>
+        <mongo.version>2.11.4</mongo.version>
         <category>Community</category>
         <licensePath>LICENSE.md</licensePath>
         <devkit.studio.package.skip>false</devkit.studio.package.skip>
+        <connector.test.version>2.0.6</connector.test.version>
     </properties>
 
     <dependencies>

@@ -14,15 +14,15 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
 import org.mule.module.mongo.api.MongoCollection;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -30,17 +30,16 @@ import com.mongodb.DBObject;
 public class MapReduceObjectsTestCases extends MongoTestParent {
 
 
-	@SuppressWarnings("unchecked")
-	@Before
-	public void setUp() {
-		try {
-			// Create the collection
-			testObjects = (Map<String, Object>) context.getBean("mapReduceObjects");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
 
-			int numApples = (Integer) testObjects.get("numApples");
-			int numOranges = (Integer) testObjects.get("numOranges");
+	@Before
+	public void setUp() throws Exception {
+			// Create the collection
+			initializeTestRunMessage("mapReduceObjects");
+			runFlowAndGetPayload("create-collection");
+
+
+			int numApples = (Integer) getTestRunMessageValue("numApples");
+			int numOranges = (Integer) getTestRunMessageValue("numOranges");
 			
 			// Create sample objects with which we can map reduce
 			List<DBObject> objects = new ArrayList<DBObject>();
@@ -57,10 +56,7 @@ public class MapReduceObjectsTestCases extends MongoTestParent {
 			// Insert the objects into the collection
 			insertObjects(objects);
 			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+
 	}
 
 	@Category({RegressionTests.class})
@@ -68,13 +64,10 @@ public class MapReduceObjectsTestCases extends MongoTestParent {
 	public void testMapReduceObjects() {
 		try {
 
-			int numApples = (Integer) testObjects.get("numApples");
-			int numOranges = (Integer) testObjects.get("numOranges");
-						
-			MessageProcessor flow = lookupFlowConstruct("map-reduce-objects");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
+			int numApples = (Integer) getTestRunMessageValue("numApples");
+			int numOranges = (Integer) getTestRunMessageValue("numOranges");
 			
-			MongoCollection resultCollection = (MongoCollection) response.getMessage().getPayload();
+			MongoCollection resultCollection = runFlowAndGetPayload("map-reduce-objects");
 			assertTrue(resultCollection != null);
 			assertTrue(resultCollection.size() == 2); // We only have apples and oranges
 								
@@ -93,32 +86,25 @@ public class MapReduceObjectsTestCases extends MongoTestParent {
 					else fail();
 				}
 			}
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+		
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 	
 	@After
-	public void tearDown() {
-		try {
-			String outputCollection = testObjects.get("outputCollection").toString();
+	public void tearDown() throws Exception {
+			String outputCollection = getTestRunMessageValue("outputCollection").toString();
 			
 			// drop the collection
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-			
+			runFlowAndGetPayload("drop-collection");
+
 			// drop the output collection
 			// replace the "collection" entry so that the drop-collection flow drops the correct collection
-			testObjects.put("collection", outputCollection);
-			flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+			upsertOnTestRunMessage("collection", outputCollection);
+			runFlowAndGetPayload("drop-collection");
+
 	}
 
 	

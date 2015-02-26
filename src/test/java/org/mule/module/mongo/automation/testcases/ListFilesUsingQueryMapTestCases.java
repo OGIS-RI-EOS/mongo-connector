@@ -13,28 +13,28 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.api.MuleMessage;
 import org.mule.module.mongo.api.automation.MongoHelper;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.DBObject;
 
 public class ListFilesUsingQueryMapTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
+
 	@Before
 	public void setUp() {
-		testObjects = (HashMap<String, Object>) context.getBean("listFilesUsingQueryMap");
+		initializeTestRunMessage("listFilesUsingQueryMap");
 
-		createFileFromPayload(testObjects.get("filename1"));
-		createFileFromPayload(testObjects.get("filename1"));
-		createFileFromPayload(testObjects.get("filename2"));
+		createFileFromPayload(getTestRunMessageValue("filename1"));
+		createFileFromPayload(getTestRunMessageValue("filename1"));
+		createFileFromPayload(getTestRunMessageValue("filename2"));
 	}
 
 	@After
@@ -42,56 +42,54 @@ public class ListFilesUsingQueryMapTestCases extends MongoTestParent {
 		deleteFilesCreatedByCreateFileFromPayload();
 	}
 
-	@SuppressWarnings("unchecked")
+
 	@Category({ RegressionTests.class })
 	@Test
 	public void testListFilesUsingQueryMap_emptyQuery() {
-		MessageProcessor listFilesFlow = lookupFlowConstruct("list-files-using-query-map-empty-query");
-		MuleEvent response = null;
+		MuleMessage response = null;
 		try {
-			response = listFilesFlow.process(getTestEvent(testObjects));
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+			response = runFlowAndGetMessage("list-files-using-query-map-empty-query");
 
-		assertNotNull(response.getMessage());
-		assertNotNull(response.getMessage().getPayload());
-		assertTrue(response.getMessage().getPayload() instanceof Iterable);
 
-		Iterable<DBObject> iterable = (Iterable<DBObject>) response
-				.getMessage().getPayload();
+		assertNotNull(response);
+		assertNotNull(response.getPayload());
+		assertTrue(response.getPayload() instanceof Iterable);
+
+		Iterable<DBObject> iterable = (Iterable<DBObject>) response.getPayload();
 
 		assertEquals(
 				"An empty query map for the query should list all the files", 3,
 				MongoHelper.getIterableSize(iterable));
 
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
 	}
 
-	@SuppressWarnings("unchecked")
+
 	@Category({ RegressionTests.class })
 	@Test
 	public void testListFilesUsingQueryMap_nonemptyQuery() {
-		MessageProcessor listFilesFlow = lookupFlowConstruct("list-files-using-query-map-non-empty-query");
-		MuleEvent response = null;
+		MuleMessage response = null;
 		try {
-			response = listFilesFlow.process(getTestEvent(testObjects));
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+			response = runFlowAndGetMessage("list-files-using-query-map-non-empty-query");
 
-		assertNotNull(response.getMessage());
-		assertNotNull(response.getMessage().getPayload());
-		assertTrue(response.getMessage().getPayload() instanceof Iterable);
 
-		Iterable<DBObject> iterable = (Iterable<DBObject>) response
-				.getMessage().getPayload();
+		assertNotNull(response);
+		assertNotNull(response.getPayload());
+		assertTrue(response.getPayload() instanceof Iterable);
+
+		Iterable<DBObject> iterable = (Iterable<DBObject>) response.getPayload();
 
 		assertEquals(
-				"Listing files with a query with key " + testObjects.get("key")
-						+ " and value " + testObjects.get("value")
+				"Listing files with a query with key " + getTestRunMessageValue("key")
+						+ " and value " + getTestRunMessageValue("value")
 						+ " should give 2 results", 2, MongoHelper.getIterableSize(iterable));
+		
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+		
 
 	}
 }

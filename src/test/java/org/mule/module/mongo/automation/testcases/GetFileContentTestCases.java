@@ -13,26 +13,27 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.InputStream;
-import java.util.HashMap;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.api.MuleMessage;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.DBObject;
 
 public class GetFileContentTestCases extends MongoTestParent {
 	
-	@SuppressWarnings("unchecked")
+
 	@Before
 	public void setUp() {
-		testObjects = (HashMap<String, Object>) context.getBean("getFileContent");
+		initializeTestRunMessage("getFileContent");
 		
-		createFileFromPayload(testObjects.get("filename1"));
-		createFileFromPayload(testObjects.get("filename2"));
+		createFileFromPayload(getTestRunMessageValue("filename1"));
+		createFileFromPayload(getTestRunMessageValue("filename2"));
 	}
 
 	@After
@@ -44,20 +45,16 @@ public class GetFileContentTestCases extends MongoTestParent {
 	@Test
 	public void testGetFileContent() {
 		try {
-			MessageProcessor getFileContentFlow = lookupFlowConstruct("get-file-content");
+			DBObject queryRef = (DBObject) getTestRunMessageValue("queryRef");
+			queryRef.put("filename", getTestRunMessageValue("filename1"));
 			
-			DBObject queryRef = (DBObject) testObjects.get("queryRef");
-			queryRef.put("filename", testObjects.get("filename1"));
+			Object response = runFlowAndGetPayload("get-file-content");
 			
-			MuleEvent response = getFileContentFlow.process(getTestEvent(testObjects));
-			
-			assertNotNull(response.getMessage());
-			assertNotNull(response.getMessage().getPayload());
-			assertTrue(response.getMessage().getPayload() instanceof InputStream);
+			assertNotNull(response);
+			assertTrue(response instanceof InputStream);
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
 		
 	}
 

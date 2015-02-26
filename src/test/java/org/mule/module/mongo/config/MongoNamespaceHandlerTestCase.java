@@ -32,7 +32,7 @@ public class MongoNamespaceHandlerTestCase extends FunctionalTestCase {
         // verify schema can be parsed.
     }
 
-    private Flow lookupFlowConstruct(String name) {
+    public Flow lookupFlowConstruct(String name) {
         return (Flow) muleContext.getRegistry().lookupFlowConstruct(name);
     }
 }

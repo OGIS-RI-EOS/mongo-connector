@@ -12,71 +12,55 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.DBObject;
 
 public class FindOneObjectTestCases extends MongoTestParent {
 
-	
-	@SuppressWarnings("unchecked")
 	@Before
-	public void setUp() {
-		try {
+	public void setUp() throws Exception {
 			// create the collection
-			testObjects = (HashMap<String, Object>) context.getBean("findOneObject");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
+			initializeTestRunMessage("findOneObject");
+			runFlowAndGetPayload("create-collection");
 			
 			// create the object
 			// dbObject is modified in the insert-object flow
-			flow = lookupFlowConstruct("insert-object");
-			flow.process(getTestEvent(testObjects));
+			runFlowAndGetPayload("insert-object");
 			
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+
 	}
 
 	@Category({ RegressionTests.class })
 	@Test
 	public void testFindOneObject() {
 		try {
-			DBObject dbObject = (DBObject) testObjects.get("dbObjectRef");
-			
-			MessageProcessor flow = lookupFlowConstruct("find-one-object");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
+			DBObject dbObject = (DBObject) getTestRunMessageValue("dbObjectRef");
 			
 			// Get the retrieved DBObject
 			// No MongoException means that it found a match (we are matching using ID)
-			DBObject payload = (DBObject) response.getMessage().getPayload();
+			DBObject payload = runFlowAndGetPayload("find-one-object");
 			assertNotNull(payload);
 			assertTrue(payload.equals(dbObject));
 			
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 
 	@After
-	public void tearDown() {
-		try {
+	public void tearDown() throws Exception {
 			// drop the collection
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+			runFlowAndGetPayload("drop-collection");
+
+
 	}
 
 }

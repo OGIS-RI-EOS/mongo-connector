@@ -12,6 +12,7 @@ import org.junit.experimental.categories.Categories;
 import org.junit.experimental.categories.Categories.IncludeCategory;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
+import org.mule.module.mongo.automation.SmokeTests;
 import org.mule.module.mongo.automation.testcases.CreateCollectionTestCases;
 import org.mule.module.mongo.automation.testcases.CreateFileFromPayloadTestCases;
 import org.mule.module.mongo.automation.testcases.CreateIndexTestCases;
@@ -24,7 +25,6 @@ import org.mule.module.mongo.automation.testcases.InsertObjectTestCases;
 import org.mule.module.mongo.automation.testcases.ListIndicesTestCases;
 import org.mule.module.mongo.automation.testcases.SaveObjectFromMapTestCases;
 import org.mule.module.mongo.automation.testcases.SaveObjectTestCases;
-import org.mule.module.mongo.automation.testcases.SmokeTests;
 
 @RunWith(Categories.class)
 @IncludeCategory(SmokeTests.class)

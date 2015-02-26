@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<connector name="Mongo DB">
+    <properties>
+    <connectivity-support>true</connectivity-support>
+    <OAuth-authentication>false</OAuth-authentication>
+    <metadata>none</metadata>
+    <datasense-enabled>false</datasense-enabled>
+    <transformer>true</transformer>
+  </properties>
+    <simpleConfig>
+        <required caption="Name" group="Basic Settings" javaType="java.lang.String" name="name" type="name"> </required>
+        <required caption="Host" group="General" javaType="java.lang.String" name="host" prefix="mongo" type="string"> </required>
+        <required caption="Port" group="General" javaType="int" name="port" prefix="mongo" type="integer"> </required>
+        <required caption="Database" group="Connection" javaType="java.lang.String" name="database" prefix="mongo" type="string"> </required>
+        <required caption="Username" group="Connection" javaType="java.lang.String" name="username" prefix="mongo" type="string"> </required>
+        <required caption="Password" group="Connection" javaType="java.lang.String" name="password" prefix="mongo" type="password"> </required>
+    </simpleConfig>
+    <message-processors>
+        <add-user name="Add user">
+            <datamapper input="WriteResult" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="New Username" group="General" javaType="java.lang.String" name="newUsername" type="string">newUser</required>
+                <required caption="New Password" group="General" javaType="java.lang.String" name="newPassword" type="string">newPass</required>
+            </attributes>
+            <childElements/>
+        </add-user>
+        <drop-database name="Drop database">
+            <datamapper input="" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </drop-database>
+        <list-collections name="List collections">
+            <datamapper input="Collection&lt;String&gt;" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </list-collections>
+        <exists-collection name="Exists collection">
+            <datamapper input="" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </exists-collection>
+        <drop-collection name="Drop collection">
+            <datamapper input="" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </drop-collection>
+        <create-collection name="Create collection">
+            <datamapper input="" output="Integer"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </create-collection>
+        <insert-object name="Insert object">
+            <datamapper input="" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </insert-object>
+        <insert-object-from-map name="Insert object from map">
+            <datamapper input="" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </insert-object-from-map>
+        <update-objects name="Update objects">
+            <datamapper input="" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+                <required caption="Query Reference" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string">newDBObject</required>
+            </attributes>
+            <childElements/>
+        </update-objects>
+        <update-objects-using-query-map name="Update objects using query map">
+            <datamapper input="" output="WriteConcern"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+                <required caption="Element Reference" group="General" javaType="com.mongodb.DBObject" name="element-ref" type="string">testDBObject</required>
+            </attributes>
+            <childElements/>
+        </update-objects-using-query-map>
+        <update-objects-using-map name="Update objects using map">
+            <datamapper input="" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </update-objects-using-map>
+        <update-objects-by-function name="Update objects by function">
+            <datamapper input="" output="WriteConcern"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+                <required caption="Function" group="General" javaType="java.lang.String" name="function" type="string">$set</required>
+                <required caption="Query Reference" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string">newDBObject</required>
+                <required caption="Element Reference" group="General" javaType="com.mongodb.DBObject" name="element-ref" type="string">testDBObject</required>
+            </attributes>
+            <childElements/>
+        </update-objects-by-function>
+        <update-objects-by-function-using-map name="Update objects by function using map">
+            <datamapper input="" output="WriteConcern"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+                <required caption="Function" group="General" javaType="java.lang.String" name="function" type="string">$set</required>
+            </attributes>
+            <childElements/>
+        </update-objects-by-function-using-map>
+        <save-object name="Save object">
+            <datamapper input="" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </save-object>
+        <save-object-from-map name="Save object from map">
+            <datamapper input="" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </save-object-from-map>
+        <remove-objects name="Remove objects">
+            <datamapper input="" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </remove-objects>
+        <remove-objects-using-query-map name="Remove objects using query map">
+            <datamapper input="" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </remove-objects-using-query-map>      
+	<map-reduce-objects name="Map reduce objects">
+            <datamapper input="Iterable&lt;DBObject&gt;" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+                <required caption="Map Function" group="General" javaType="java.lang.String" name="mapFunction" type="string">function() { emit(this.item, 1); }</required>
+                <required caption="Reduce Function" group="General" javaType="java.lang.String" name="reduceFunction" type="string">function(key, values) { var result = 0; values.forEach(function(value) { result += 1 }); return {count: result}; }</required>
+            </attributes>
+            <childElements/>
+        </map-reduce-objects>
+        <count-objects name="Count objects">
+            <datamapper input="" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </count-objects>
+        <count-objects-using-query-map name="Count objects using query map">
+            <datamapper input="" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </count-objects-using-query-map>
+        <find-objects name="Find objects">
+            <datamapper input="Iterable&lt;DBObject&gt;" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </find-objects>
+        <find-objects-using-query-map name="Find objects using query map">
+            <datamapper input="Iterable&lt;DBObject&gt;" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </find-objects-using-query-map>
+        <find-one-object name="Find one object">
+            <datamapper input="DBObject" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </find-one-object>
+        <find-one-object-using-query-map name="Find one object using query map">
+            <datamapper input="DBObject" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </find-one-object-using-query-map>
+        <create-index name="Create index">
+            <datamapper input="" output="IndexOrder"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+                <required caption="Field" group="General" javaType="java.lang.String" name="field" type="string">myField</required>
+            </attributes>
+            <childElements/>
+        </create-index>
+        <drop-index name="Drop index">
+            <datamapper input="" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+                <required caption="Index" group="General" javaType="java.lang.String" name="index" type="string">newIndex</required>
+            </attributes>
+            <childElements/>
+        </drop-index>
+        <list-indices name="List indices">
+            <datamapper input="Collection&lt;DBObject&gt;" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Collection" group="General" javaType="java.lang.String" name="collection" type="string">newCollection</required>
+            </attributes>
+            <childElements/>
+        </list-indices>
+        <create-file-from-payload name="Create file from payload">
+            <datamapper input="DBObject" output="Object"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Filename" group="General" javaType="java.lang.String" name="filename" type="string">myFilename</required>
+            </attributes>
+            <childElements/>
+        </create-file-from-payload>
+        <find-files name="Find files">
+            <datamapper input="Iterable&lt;DBObject&gt;" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </find-files>
+        <find-files-using-query-map name="Find files using query map">
+            <datamapper input="Iterable&lt;DBObject&gt;" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </find-files-using-query-map>
+        <find-one-file name="Find one file">
+            <datamapper input="DBObject" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Query Reference" group="General" javaType="com.mongodb.DBObject" name="query-ref" type="string">newDBObject</required>
+            </attributes>
+            <childElements/>
+        </find-one-file>
+        <find-one-file-using-query-map name="Find one file using query map">
+            <datamapper input="DBObject" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </find-one-file-using-query-map>
+        <get-file-content name="Get file content">
+            <datamapper input="InputStream" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </get-file-content>
+        <get-file-content-using-query-map name="Get file content using query map">
+            <datamapper input="InputStream" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </get-file-content-using-query-map>
+        <list-files name="List files">
+            <datamapper input="Iterable&lt;DBObject&gt;" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </list-files>
+        <list-files-using-query-map name="List files using query map">
+            <datamapper input="Iterable&lt;DBObject&gt;" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </list-files-using-query-map>
+        <remove-files name="Remove files">
+            <datamapper input="" output="DBObject"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </remove-files>
+        <remove-files-using-query-map name="Remove files using query map">
+            <datamapper input="" output="Map"/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </remove-files-using-query-map>
+        <execute-command name="Execute command">
+            <datamapper input="DBObject" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes>
+                <required caption="Command Name" group="General" javaType="java.lang.String" name="commandName" type="string">drop</required>
+            </attributes>
+            <childElements/>
+        </execute-command>
+        <dump name="Dump">
+            <datamapper input="" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </dump>
+        <incremental-dump name="Incremental dump">
+            <datamapper input="" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </incremental-dump>
+        <restore name="Restore">
+            <datamapper input="" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </restore>
+        <start-consistent-request name="Start consistent request">
+            <datamapper input="" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </start-consistent-request>
+        <end-consistent-request name="End consistent request">
+            <datamapper input="" output=""/>
+            <auto-paging>false</auto-paging>
+            <query-support>false</query-support>
+            <attributes/>
+            <childElements/>
+        </end-consistent-request>
+    </message-processors>
+</connector>

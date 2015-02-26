@@ -11,31 +11,25 @@ package org.mule.module.mongo.automation.testcases;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.MuleMessage;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.DBObject;
 
 public class InsertObjectFromMapTestCases extends MongoTestParent {
 
-	@SuppressWarnings("unchecked")
+
 	@Before
-	public void setUp() {
-		try {
-			testObjects = (HashMap<String, Object>) context.getBean("insertObjectFromMap");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			flow.process(getTestEvent(testObjects));
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+	public void setUp() throws Exception {
+			initializeTestRunMessage("insertObjectFromMap");
+			runFlowAndGetPayload("create-collection");
+
+
 	}
 
 	@Category({ RegressionTests.class})
@@ -43,41 +37,29 @@ public class InsertObjectFromMapTestCases extends MongoTestParent {
 	public void testInsertObjectFromMap() {
 		try {
 
-			String key = testObjects.get("key").toString();
-			String value = testObjects.get("value").toString();
+			String key = getTestRunMessageValue("key").toString();
+			String value = getTestRunMessageValue("value").toString();
 			
-			MessageProcessor flow = lookupFlowConstruct("insert-object-from-map");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-			MuleMessage message = response.getMessage();
-			String objectID = message.getPayload().toString();
+			String objectID = runFlowAndGetPayload("insert-object-from-map");
 			
 			assertTrue(objectID != null && !objectID.equals("") && !objectID.trim().equals(""));
 			
-			flow = lookupFlowConstruct("find-one-object-using-query-map");
-			response = flow.process(getTestEvent(testObjects));
-			
-			DBObject object = (DBObject) response.getMessage().getPayload();
+			DBObject object = runFlowAndGetPayload("find-one-object-using-query-map");
 			assertTrue(object.containsField("_id"));
 			assertTrue(object.containsField(key));
 			
 			assertTrue(object.get("_id").equals(objectID));
 			assertTrue(object.get(key).equals(value));
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
 	}
 	
 	@After
-	public void tearDown() {
-		try {
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			fail();
-		}
+	public void tearDown() throws Exception {
+			runFlowAndGetPayload("drop-collection");
+
+
 	}
 }

@@ -12,47 +12,40 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.processor.MessageProcessor;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 public class IncrementalDumpTestCases extends MongoTestParent {
 	
-	@SuppressWarnings("unchecked")
+
 	@Before
 	public void setUp() {
-		testObjects = (HashMap<String, Object>) context.getBean("dump");
+		initializeTestRunMessage("dump");
 	}
 
 	@After
-	public void tearDown() {
-		try {
-			FileUtils.deleteDirectory(new File("./" + testObjects.get("outputDirectory")));
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	public void tearDown() throws Exception {
+			FileUtils.deleteDirectory(new File("./" + getTestRunMessageValue("outputDirectory")));
+
 	}
 
 	@Category({ RegressionTests.class })
 	@Test
 	public void testIncrementalDump() {
 		try {
-			MessageProcessor dumpFlow = lookupFlowConstruct("dump");
-			
-			dumpFlow.process(getTestEvent(testObjects));
-			
-			File dumpOutputDir = new File("./" + testObjects.get("outputDirectory"));
+			runFlowAndGetPayload("dump");
+			File dumpOutputDir = new File("./" + getTestRunMessageValue("outputDirectory"));
 			assertTrue("dump directory should exist after test runs", dumpOutputDir.exists());
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
 		
 	}
 

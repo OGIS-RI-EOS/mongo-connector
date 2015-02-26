@@ -12,16 +12,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.mule.api.MuleEvent;
-import org.mule.api.processor.MessageProcessor;
 import org.mule.module.mongo.api.MongoCollection;
+import org.mule.module.mongo.automation.MongoTestParent;
+import org.mule.module.mongo.automation.RegressionTests;
+import org.mule.module.mongo.automation.SmokeTests;
+import org.mule.modules.tests.ConnectorTestUtils;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -30,67 +31,47 @@ public class FindObjectsTestCases extends MongoTestParent {
 
 	private List<String> objectIDs = new ArrayList<String>();
 	
-	@SuppressWarnings("unchecked")
-	@Before
-	public void setUp() {
-		try {
-			// create collection
-			testObjects = (HashMap<String, Object>) context.getBean("findObjects");
-			MessageProcessor flow = lookupFlowConstruct("create-collection");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-			
-			// create sample objects			
-			flow = lookupFlowConstruct("insert-object");
 
-			int numberOfObjects = (Integer) testObjects.get("numberOfObjects");
+	@Before
+	public void setUp() throws Exception {
+			// create collection
+			initializeTestRunMessage("findObjects");
+			runFlowAndGetPayload("create-collection");
+
+			int numberOfObjects = (Integer) getTestRunMessageValue("numberOfObjects");
 			
 			for (int i = 0; i < numberOfObjects; i++) {
 				BasicDBObject dbObject = new BasicDBObject();
-				testObjects.put("dbObjectRef", dbObject);
-				response = flow.process(getTestEvent(testObjects));
+				upsertOnTestRunMessage("dbObjectRef", dbObject);
 				
-				String payload = response.getMessage().getPayload().toString();
+				String payload = runFlowAndGetPayload("insert-object");
 				objectIDs.add(payload);
 			}
 			
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+
 	}
 
 	@Category({SmokeTests.class, RegressionTests.class})
 	@Test
 	public void testFindObjects() {
 		try {
-			MessageProcessor flow = lookupFlowConstruct("find-objects");
-			MuleEvent response = flow.process(getTestEvent(testObjects));
-			
-			MongoCollection payload = (MongoCollection) response.getMessage().getPayload();
+			MongoCollection payload = runFlowAndGetPayload("find-objects");
 			
 			assertTrue(objectIDs.size() == payload.size());
 			for (DBObject obj : payload) { 
 				String dbObjectID = obj.get("_id").toString();
 				assertTrue(objectIDs.contains(dbObjectID));
 			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+		} catch (Exception e) {
+	         fail(ConnectorTestUtils.getStackTrace(e));
+	    }
+
 	}
 	
 	@After
-	public void tearDown() {
-		try {
-			MessageProcessor flow = lookupFlowConstruct("drop-collection");
-			flow.process(getTestEvent(testObjects));
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
+	public void tearDown() throws Exception {
+			runFlowAndGetPayload("drop-collection");
+
 	}
 	
 	
